@@ -9,7 +9,12 @@
     - import_tasks: ./setup/create_swap.yml
     - import_tasks: ./setup/upgrade_release.yml
     - import_tasks: ./setup/install_basics.yml
+    - import_tasks: ./setup/secure_ssh.yml
     - name: Read configuration variables
-      include_vars: ../provision/shadowsocks.yml
-    - name: add SHADOWSOCKS user
-      user: name="{{ SHADOWSOCKS.USER }}"
+      include_vars: ../provision/global_vars.yml
+    - name: Add SHADOWSOCKS user
+      user:
+        name: "{{ SHADOWSOCKS.USER }}"
+        shell: /bin/bash
+        groups: sudo
+        append: yes
