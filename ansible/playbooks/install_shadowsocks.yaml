@@ -6,6 +6,8 @@
   vars:
       ansible_ssh_pipelining: yes
   tasks:
+    - import_tasks: ./setup/locales.yml
+    - import_tasks: ./setup/change_root_password.yml
     - import_tasks: ./setup/create_swap.yml
     - import_tasks: ./setup/upgrade_release.yml
     - import_tasks: ./setup/install_basics.yml
