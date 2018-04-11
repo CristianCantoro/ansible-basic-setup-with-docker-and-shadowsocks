@@ -1,0 +1,22 @@
+---
+
+- name: Install ccshadowsocks
+  hosts: ccshadowsocks-servers
+  remote_user: root
+  vars:
+      ansible_ssh_pipelining: yes
+  tasks:
+    - import_tasks: initial_install.yml
+    - import_tasks: create_swap.yml
+    - name: install htop
+      apt:
+        name: htop
+        state: present
+    - name: Read configuration variables
+      include_vars: ../provision/shadowsocks.yml
+    - name: add SHADOWSOCKS user
+      user: name="{{ SHADOWSOCKS.USER }}"
+    - name: copy provision directory
+      synchronize: mode=pull
+        src=../provision
+        dest={{ CMS.USER }}@{{ ansible_host }}:/tmp

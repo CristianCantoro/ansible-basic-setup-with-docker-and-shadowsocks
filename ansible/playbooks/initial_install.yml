@@ -1,0 +1,47 @@
+---
+- name: update packages
+  apt: update_cache=yes
+# do-release-upgrade with Ansible
+# See:
+# 
+# https://www.jeffgeerling.com/blog/2017/
+#     ansible-playbook-upgrade-all-ubuntu-1204-lts-hosts-1404-or-1604
+# Use a block to perform tasks conditionally—only if running Ubuntu 12.04.
+- block:
+
+  - debug:
+      msg: 'This server is running Ubuntu 14.04 LTS and will be upgraded to 16.04 LTS.'
+
+  # Now would be a good time to take a backup if you can trigger an
+  # automated backup!
+
+  - name: remove the EOL message of the day if one exists.
+    file:
+      path: "{{ item }}"
+      state: absent
+    with_items:
+      - /etc/update-motd.d/99-esm
+      - /run/motd.dynamic
+
+  - name: upgrade all packages to the latest version
+    apt: update_cache=yes upgrade=full
+
+  - name: ensure update-manager-core is installed.
+    apt: name=update-manager-core state=present
+
+  - name: run do-release-upgrade non-interactively.
+    command: do-release-upgrade -f DistUpgradeViewNonInteractive
+
+  - name: reboot the server.
+    command: reboot
+    async: 0
+    poll: 0
+
+  - name: wait for server to reboot.
+    wait_for:
+      host: "{{ ansible_ssh_host }}"
+      state: started
+    connection: local
+    become: no
+
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '14.04'

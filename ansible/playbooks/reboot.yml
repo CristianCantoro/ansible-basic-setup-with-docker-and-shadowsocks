@@ -1,0 +1,7 @@
+---
+- name: wait for server to reboot.
+  wait_for:
+    host: "{{ ansible_ssh_host }}"
+    state: started
+  connection: local
+  become: no
