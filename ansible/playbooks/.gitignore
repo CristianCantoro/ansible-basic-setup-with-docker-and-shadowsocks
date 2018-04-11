@@ -1,0 +1,2 @@
+# ignore retry playbooks
+*.retry

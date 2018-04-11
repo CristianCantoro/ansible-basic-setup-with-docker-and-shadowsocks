@@ -1,0 +1,58 @@
+---
+# Add swapfile to Ubuntu
+# See:
+# 
+# https://www.digitalocean.com/community/tutorials/
+#     how-to-add-swap-space-on-ubuntu-16-04
+#
+# Use a block to perform tasks conditionally
+# only if /.swapfile is not present
+#
+- stat: path=/.swapfile
+  register: swapfile
+- block:
+
+  - debug:
+      msg: 'Add swapfile to Ubuntu'
+
+  # read config, create /.swapfile and make it 600
+  - name: Read configuration variables
+    include_vars: ../provision/shadowsocks.yml
+  - name: allocate '/.swapfile'.
+    command: /usr/bin/fallocate -l {{ SHADOWSOCKS.SWAPFILE_SIZE }} /.swapfile creates=/.swapfile
+  - name: changing permissions of '/.swapfile to 600
+    file: dest=/.swapfile mode=600
+
+  # make /.swapfile a swap partition and activate it
+  - name: make '/.swapfile' a swap space.
+    command: /sbin/mkswap /.swapfile
+  - name: make '/.swapfile' a swap space.
+    command: /sbin/swapon /.swapfile
+
+  # add /.swapfile to /etc/fstab to make it permanent
+  - name: update /etc/fstab to make /.swapfile permanent.
+    blockinfile:
+      path: /etc/fstab
+      block: |
+        # make /.swapfile permanent
+        /.swapfile none swap sw 0 0
+
+  when: swapfile.stat.exists == False
+
+# adjust swappiness and cached pressure
+- name: copy 101-swappiness.conf to /etc/sysctl.d/ 
+  copy:
+    src: ../../provision/setup/etc/sysctl.d/101-swappiness.conf
+    dest: /etc/sysctl.d/101-swappiness.conf
+    mode: 0644
+- name: copy 102-cache-pressure.conf to /etc/sysctl.d/
+  copy:
+    src: ../../provision/setup/etc/sysctl.d/102-cache-pressure.conf
+    dest: /etc/sysctl.d/102-cache-pressure.conf
+    mode: 0644
+
+- name: set swappines to 0.
+  command: /sbin/sysctl vm.swappiness=0
+- name: set cache pressure to 20.
+  command: /sbin/sysctl vm.vfs_cache_pressure=20
+

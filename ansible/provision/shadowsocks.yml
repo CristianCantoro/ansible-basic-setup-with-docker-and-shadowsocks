@@ -3,4 +3,4 @@ SHADOWSOCKS:
   ## CCSHADOWSOCKS variables
   VERSION: 0.0.1
   USER: ccshadowsocks
-  SWAPFILE_SIZE: 1G
+  SWAPFILE_SIZE: 2G
