@@ -44,4 +44,12 @@
     connection: local
     become: no
 
+  - name: Remove dependencies that are no longer required
+    apt:
+      autoremove: yes
+
+  - name: Remove useless packages from the cache
+    apt:
+      autoclean: yes
+
   when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '14.04'

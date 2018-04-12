@@ -1,0 +1,10 @@
+---
+# Change configuration of SSH to key-only
+- name: read /etc/ssh/sshd_config
+  shell: cat /etc/ssh/sshd_config
+  register: sshd_config
+
+# Port 22 -> random number
+# PermitRootLogin yes -> PermitRootLogin no
+# X11Forwarding yes -> X11Forwarding no
+# #PasswordAuthentication yes -> PasswordAuthentication no
