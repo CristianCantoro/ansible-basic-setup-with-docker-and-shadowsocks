@@ -1,10 +1,20 @@
 ---
 # Change configuration of SSH to key-only
+# The role does the following things:
+# 1. Add identity key to authorized keys on host
+# 2. Disable empty password login
+#      -> PermitEmptyPasswords no
+# 3. Disable remote root login
+#      -> PermitRootLogin no
+# 4. Disable password login
+#      -> PasswordAuthentication no
+# 5. Enable PAM
+#      -> UsePAM yes
+# X11Forwarding yes -> X11Forwarding no
 - name: read /etc/ssh/sshd_config
   shell: cat /etc/ssh/sshd_config
   register: sshd_config
-
-# Port 22 -> random number
-# PermitRootLogin yes -> PermitRootLogin no
-# X11Forwarding yes -> X11Forwarding no
-# #PasswordAuthentication yes -> PasswordAuthentication no
+- debug:
+    msg: "I am in role secure_ssh and ssh_user is '{{ssh_user}}'"
+- import_role: 
+    name: ansible-secure-ssh

@@ -7,4 +7,4 @@
 #   - A hostname/ip can be a member of multiple groups
 
 [ccshadowsocks-servers]
-ccshadowsocks   ansible_host="{{ lookup('env', 'CCSHADOWSOCKS_IP_ADDRESS') }}"    ansible_port="{{ lookup('env', 'CCSHADOWSOCKS_SSH_PORT') }}"	ansible_ssh_user=root
+ccshadowsocks2   ansible_ssh_user=root
