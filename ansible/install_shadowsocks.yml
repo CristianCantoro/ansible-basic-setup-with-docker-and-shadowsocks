@@ -1,0 +1,48 @@
+---
+- name: Install shadowsocks
+  hosts: shadowsocks-servers
+  remote_user: root
+  vars:
+      ansible_ssh_pipelining: yes
+  tasks:
+    # activate locales:
+    # langs:
+    #   - it_IT.UTF-8 UTF-8
+    #   - en_US.UTF-8 UTF-8
+    #   - es_ES.UTF-8 UTF-8
+    - include_role:
+        name: locales
+    - meta: flush_handlers
+
+    # Change configuration of SSH to key-only
+    # The role does the following things:
+    # 1. Add identity key to authorized keys on host
+    # 2. Disable empty password login
+    #      -> PermitEmptyPasswords no
+    # 3. Disable remote root login
+    #      -> PermitRootLogin no
+    # 4. Disable password login
+    #      -> PasswordAuthentication no
+    # 5. Enable PAM
+    #      -> UsePAM yes
+    # X11Forwarding yes -> X11Forwarding no
+    # - include_role:
+    #     name: ansible-ssh-hardening
+
+    # - include_tasks: ./setup/create_swap.yml
+    # - include_tasks: ./setup/upgrade_release.yml
+    # - include_tasks: ./setup/install_basics.yml
+    # - name: Read configuration variables
+    #   include_vars: ../provision/global_vars.yml
+    # - name: Add SHADOWSOCKS user
+    #   user:
+    #     name: "{{ SHADOWSOCKS.USER }}"
+    #     shell: /bin/bash
+    #     groups: sudo
+    #     append: yes
+    # - include_tasks: ./setup/secure_ssh.yml
+    #   vars:
+    #     ssh_user: "{{ SHADOWSOCKS.USER }}"
+    # install docker
+    # install shadowsocks on docker
+    # adjust the logging

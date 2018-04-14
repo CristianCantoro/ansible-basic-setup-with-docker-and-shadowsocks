@@ -1,0 +1,11 @@
+---
+# fix issues with locales
+- name: Ensure locales are listed in /etc/locale.gen.
+  lineinfile:
+    dest: /etc/locale.gen
+    regexp: '^(\# )?{{item}}$'
+    line: '{{item}}'
+    state: present
+  with_items: "{{ langs }}"
+  notify:
+    - regenerate locales
