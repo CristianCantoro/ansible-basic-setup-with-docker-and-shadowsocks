@@ -1,0 +1,6 @@
+---
+# defaults file for swap
+swapfile_path: /.swapfile
+swapfile_size: 2G
+swappiness: 0
+vfs_cache_pressure: 20
