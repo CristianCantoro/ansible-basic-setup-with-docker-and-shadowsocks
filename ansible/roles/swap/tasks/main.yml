@@ -13,9 +13,6 @@
 # only if /.swapfile is not present
 - block:
 
-  - debug:
-      msg: 'Add swapfile to Ubuntu'
-
   # read config, create swapfile and make it 600
   - name: Allocate '/.swapfile'.
     command: /usr/bin/fallocate -l "{{ swapfile_size }}" "{{ swapfile_path }}" creates="{{ swapfile_path }}"
@@ -38,27 +35,35 @@
 
   when: swapfile.stat.exists == False
 
-# adjust swappiness and cache pressure
-- name: Copy 101-swappiness.conf to /etc/sysctl.d/
-  template:
-    src: ./templates/etc/sysctl.d/101-swappiness.conf.j2
-    dest: /etc/sysctl.d/101-swappiness.conf
-    mode: 0644
-  notify: sysctl
-  when: swappiness != false
+- name: Read sysctl settings.
+  command: /sbin/sysctl -a
+  register: sysctl_settings
 
-- name: Copy 102-cache-pressure.conf to /etc/sysctl.d/
-  template:
-    src: ./templates/etc/sysctl.d/102-cache-pressure.conf.j2
-    dest: /etc/sysctl.d/102-cache-pressure.conf
-    mode: 0644
-  notify: sysctl
-  when: vfs_cache_pressure != false
+- block:
+  # adjust swappiness and cache pressure
+  - name: Copy 101-swappiness.conf to /etc/sysctl.d/
+    template:
+      src: ./templates/etc/sysctl.d/101-swappiness.conf.j2
+      dest: /etc/sysctl.d/101-swappiness.conf
+      mode: 0644
+    notify: sysctl
 
-- name: Set swappines.
-  command: /sbin/sysctl vm.swappiness="{{ swappiness }}"
-  when: swappiness != false
+  - name: Set swappiness.
+    command: /sbin/sysctl vm.swappiness="{{ swappiness }}"
 
-- name: Set cache pressure.
-  command: /sbin/sysctl vm.vfs_cache_pressure="{{ vfs_cache_pressure }}"
-  when: vfs_cache_pressure != false
+  when: (swappiness != false) and
+        (sysctl_settings.stdout.find('vm.swappiness') != -1)
+
+- block:
+  - name: Copy 102-cache-pressure.conf to /etc/sysctl.d/
+    template:
+      src: ./templates/etc/sysctl.d/102-cache-pressure.conf.j2
+      dest: /etc/sysctl.d/102-cache-pressure.conf
+      mode: 0644
+    notify: sysctl
+
+  - name: Set cache pressure.
+    command: /sbin/sysctl vm.vfs_cache_pressure="{{ vfs_cache_pressure }}"
+
+  when: (vfs_cache_pressure != false) and
+        (sysctl_settings.stdout.find('vm.vfs_cache_pressure') != -1)
