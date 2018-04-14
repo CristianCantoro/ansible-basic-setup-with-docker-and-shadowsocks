@@ -11,10 +11,7 @@
 # 5. Enable PAM
 #      -> UsePAM yes
 # X11Forwarding yes -> X11Forwarding no
-- name: read /etc/ssh/sshd_config
-  shell: cat /etc/ssh/sshd_config
-  register: sshd_config
 - debug:
     msg: "I am in role secure_ssh and ssh_user is '{{ssh_user}}'"
 - import_role: 
-    name: ansible-secure-ssh
+    name: ansible-ssh-hardening
