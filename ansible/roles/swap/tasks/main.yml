@@ -41,7 +41,7 @@
 # adjust swappiness and cache pressure
 - name: Copy 101-swappiness.conf to /etc/sysctl.d/
   template:
-    src: ./templates/etc/sysctl.d/101-swappiness.conf
+    src: ./templates/etc/sysctl.d/101-swappiness.conf.j2
     dest: /etc/sysctl.d/101-swappiness.conf
     mode: 0644
   notify: sysctl
@@ -49,7 +49,7 @@
 
 - name: Copy 102-cache-pressure.conf to /etc/sysctl.d/
   template:
-    src: ./templates/etc/sysctl.d/102-cache-pressure.conf
+    src: ./templates/etc/sysctl.d/102-cache-pressure.conf.j2
     dest: /etc/sysctl.d/102-cache-pressure.conf
     mode: 0644
   notify: sysctl

@@ -1,5 +1,5 @@
-# Reduce cache pressure
+# Add swap and set swappiness
 # See:
 # https://www.digitalocean.com/
 #    community/tutorials/how-to-add-swap-on-ubuntu-14-04
-vm.vfs_cache_pressure=20
+vm.swappiness="{{ swappiness }}"
