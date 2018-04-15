@@ -22,20 +22,20 @@
         name: swap
 
     - name: Upgrade system.
-      include_tasks:
-        name: upgrade_release.yml
+      include_role:
+        name: upgrade-release
 
-    - name: Install basic packages.
-      include_tasks:
-        name: install_basics.yml
+    # - name: Install basic packages.
+    #   include_tasks:
+    #     name: install_basics.yml
 
-    - name: Add shadowsocks user.
-      include_tasks:
-        name: add_user.yml
+    # - name: Add shadowsocks user.
+    #   include_tasks:
+    #     name: add_user.yml
 
-    - name: Secure SSH.
-      include_tasks:
-        name: secure_ssh.yml
+    # - name: Secure SSH.
+    #   include_tasks:
+    #     name: secure_ssh.yml
 
     # install docker
     # install shadowsocks on docker
