@@ -4,47 +4,39 @@
   remote_user: root
   vars:
       ansible_ssh_pipelining: yes
+      playbook:
+        version: 0.0.1
   tasks:
     # activate locales:
     # langs:
     #   - it_IT.UTF-8 UTF-8
     #   - en_US.UTF-8 UTF-8
     #   - es_ES.UTF-8 UTF-8
-    - include_role:
+    - name: Enable locales.
+      include_role:
         name: locales
     - meta: flush_handlers
 
-    - include_role:
+    - name: Add swap to the system.
+      include_role:
         name: swap
 
-    # Change configuration of SSH to key-only
-    # The role does the following things:
-    # 1. Add identity key to authorized keys on host
-    # 2. Disable empty password login
-    #      -> PermitEmptyPasswords no
-    # 3. Disable remote root login
-    #      -> PermitRootLogin no
-    # 4. Disable password login
-    #      -> PasswordAuthentication no
-    # 5. Enable PAM
-    #      -> UsePAM yes
-    # X11Forwarding yes -> X11Forwarding no
-    # - include_role:
-    #     name: ansible-ssh-hardening
+    - name: Upgrade system.
+      include_tasks:
+        name: upgrade_release.yml
 
-    # - include_tasks: ./setup/upgrade_release.yml
-    # - include_tasks: ./setup/install_basics.yml
-    # - name: Read configuration variables
-    #   include_vars: ../provision/global_vars.yml
-    # - name: Add SHADOWSOCKS user
-    #   user:
-    #     name: "{{ SHADOWSOCKS.USER }}"
-    #     shell: /bin/bash
-    #     groups: sudo
-    #     append: yes
-    # - include_tasks: ./setup/secure_ssh.yml
-    #   vars:
-    #     ssh_user: "{{ SHADOWSOCKS.USER }}"
+    - name: Install basic packages.
+      include_tasks:
+        name: install_basics.yml
+
+    - name: Add shadowsocks user.
+      include_tasks:
+        name: add_user.yml
+
+    - name: Secure SSH.
+      include_tasks:
+        name: secure_ssh.yml
+
     # install docker
     # install shadowsocks on docker
     # adjust the logging

@@ -1,0 +1,6 @@
+---
+## SHADOWSOCKS variables
+shadowsocks_user: shadowsocks
+swapfile_size: 2G
+ssh_server_ports: ['29808']
+ssh_client_port: '29808'
