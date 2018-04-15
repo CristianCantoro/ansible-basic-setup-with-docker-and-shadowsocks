@@ -49,7 +49,7 @@
     notify: sysctl
 
   - name: Set swappiness.
-    command: /sbin/sysctl vm.swappiness="{{ swappiness }}"
+    command: /sbin/sysctl vm.swappiness={{ swappiness }}
 
   when: (swappiness != false) and
         (sysctl_settings.stdout.find('vm.swappiness') != -1)
@@ -63,7 +63,7 @@
     notify: sysctl
 
   - name: Set cache pressure.
-    command: /sbin/sysctl vm.vfs_cache_pressure="{{ vfs_cache_pressure }}"
+    command: /sbin/sysctl vm.vfs_cache_pressure={{ vfs_cache_pressure }}
 
   when: (vfs_cache_pressure != false) and
         (sysctl_settings.stdout.find('vm.vfs_cache_pressure') != -1)

@@ -2,3 +2,4 @@
 # handlers file for swap
 - name: sysctl
   command: sysctl -p
+
