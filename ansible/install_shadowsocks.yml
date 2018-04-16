@@ -2,10 +2,12 @@
 - name: Install shadowsocks
   hosts: shadowsocks-servers
   remote_user: root
+
   vars:
       ansible_ssh_pipelining: yes
       playbook:
         version: 0.0.1
+
   tasks:
     # activate locales:
     # langs:
@@ -52,9 +54,9 @@
       vars:
         new_user: "{{ shadowsocks_user }}"
 
-    # - name: Secure SSH.
-    #   include_tasks:
-    #     name: secure_ssh.yml
+    - name: Secure SSH.
+      include_role:
+        name: secure-ssh
 
     # install docker
     # install shadowsocks on docker
