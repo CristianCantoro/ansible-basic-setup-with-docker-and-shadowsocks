@@ -46,9 +46,11 @@
       include_role:
         name: install-basics
 
-    # - name: Add shadowsocks user.
-    #   include_tasks:
-    #     name: add_user.yml
+    - name: Add shadowsocks user.
+      include_role:
+        name: add-user
+      vars:
+        new_user: "{{ shadowsocks_user }}"
 
     # - name: Secure SSH.
     #   include_tasks:

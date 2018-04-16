@@ -1,6 +1,18 @@
 ---
 ## SHADOWSOCKS variables
-shadowsocks_user: shadowsocks
+
+# role: 'locales'
+langs:
+  - es_ES.UTF-8 UTF-8
+  - en_US.UTF-8 UTF-8
+  - it_IT.UTF-8 UTF-8
+
+# role: 'swap'
 swapfile_size: 2G
+
+# role: 'add-user'
+shadowsocks_user: shadowsocks
+
+# role 'ssh-secure'
 ssh_server_ports: ['29808']
 ssh_client_port: '29808'

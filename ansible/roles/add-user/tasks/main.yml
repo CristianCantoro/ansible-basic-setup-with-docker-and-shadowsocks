@@ -2,7 +2,7 @@
 # Add shadowsocks user
 - name: Add shadowsocks user.
   user:
-    name: "{{ shadowsocks_user }}"
+    name: "{{ new_user }}"
     shell: /bin/bash
     groups: sudo
     append: yes
