@@ -1,3 +1,4 @@
+---
 # Taken from:
 #
 # https://www.redpill-linpro.com/sysadvent/2017/12/02/ansible-change-passwords.html
@@ -9,8 +10,7 @@
 
 # First we ensure that we've got the tools and settings required, and pull the
 # latest version of password-store repo.
-- hosts: localhost
-  any_errors_fatal: true
+- any_errors_fatal: true
   become: false
 
   tasks:
@@ -156,16 +156,3 @@
       user:
         name: root
         password: "{{ password_hash.stdout_lines[-1] }}"
-
-# All servers in the hostlist have now had their password changed, and the new
-# passwords have been inserted into our password-store. Do a git-push of our
-# password-store to the central repo.
-- name: git push password-store
-  hosts: localhost
-  gather_facts: no
-  become: false
-
-  tasks:
-    - name: git push password-store
-      command: pass git push
-
