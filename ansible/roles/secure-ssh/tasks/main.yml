@@ -1,5 +1,6 @@
 ---
 # Change configuration of SSH to key-only
+
 # The role does the following things:
 # 1. Add identity key to authorized keys on host
 # 2. Disable empty password login
@@ -10,7 +11,8 @@
 #      -> PasswordAuthentication no
 # 5. Enable PAM
 #      -> UsePAM yes
-# X11Forwarding yes -> X11Forwarding no
 - name: Harden SSH configuration.
   import_role:
     name: ansible-ssh-hardening
+
+# X11Forwarding yes -> X11Forwarding no
