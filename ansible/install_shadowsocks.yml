@@ -25,9 +25,26 @@
       include_role:
         name: upgrade-release
 
-    # - name: Install basic packages.
-    #   include_tasks:
-    #     name: install_basics.yml
+    # Install basic packages:
+    #   - htop
+    #   - tree
+    #   - lynx
+    #   - colordiff
+    #   - tmux
+    #   - zsh
+    #   - git-core
+    #   - molly-guard
+    #   - realpath
+    #   - ntp
+    #   - ntp-doc
+    #   - ntpdate
+    #   - gpgv2
+    #   - apt-transport-https
+    #   - ca-certificates
+    #   - software-properties-common
+    - name: Install basic packages.
+      include_role:
+        name: install-basics
 
     # - name: Add shadowsocks user.
     #   include_tasks:

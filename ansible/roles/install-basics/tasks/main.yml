@@ -1,0 +1,14 @@
+---
+- name: update packages
+  apt: update_cache=yes
+
+# Install a list of packages with Ansible
+# See:
+# 
+# https://www.randomhacks.co.uk/how-to-install-a-list-of-packages-with-ansible/
+#
+- name: Install packages
+  apt:
+    name={{item}}
+    state=present
+  with_items: "{{ basic_packages }}"

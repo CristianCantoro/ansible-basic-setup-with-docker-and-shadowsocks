@@ -1,0 +1,19 @@
+---
+# defaults file for install-basics
+basic_packages:
+  - htop
+  - tree
+  - lynx
+  - colordiff
+  - tmux
+  - zsh
+  - git-core
+  - molly-guard
+  - realpath
+  - ntp
+  - ntp-doc
+  - ntpdate
+  - gpgv2
+  - apt-transport-https
+  - ca-certificates
+  - software-properties-common
