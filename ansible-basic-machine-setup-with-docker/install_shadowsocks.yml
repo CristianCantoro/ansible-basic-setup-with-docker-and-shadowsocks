@@ -4,7 +4,6 @@
   remote_user: root
 
   vars:
-      ansible_ssh_pipelining: yes
       playbook:
         version: 0.0.2
 
@@ -59,11 +58,11 @@
       vars:
         new_user: "{{ shadowsocks_user }}"
 
-    # TODO: set new password
-
+    # TODO: set new user password
+    # TODO: add SSH filtering by country
     - name: Secure SSH.
       include_role:
         name: secure-ssh
 
-    # install shadowsocks on docker
+    # pull shadowsocks container
     # adjust the logging
