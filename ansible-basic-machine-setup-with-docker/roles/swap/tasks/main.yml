@@ -31,7 +31,7 @@
       path: /etc/fstab
       block: |
         # make swapfile permanent
-        "{{ swap_path }}   none    swap    sw    0   0"
+        "{{ swapfile_path }}   none    swap    sw    0   0"
 
   when: swapfile.stat.exists == False
 
