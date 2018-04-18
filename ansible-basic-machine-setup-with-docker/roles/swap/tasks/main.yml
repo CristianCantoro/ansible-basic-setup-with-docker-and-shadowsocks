@@ -51,8 +51,8 @@
   - name: Set swappiness.
     command: /sbin/sysctl vm.swappiness={{ swappiness }}
 
-  when: (swappiness != false) and
-        (sysctl_settings.stdout.find('vm.swappiness') != -1)
+  # swappiness = 0 is a perfectly legitimate value
+  when: sysctl_settings.stdout.find('vm.swappiness') != -1
 
 - block:
   - name: Copy 102-cache-pressure.conf to /etc/sysctl.d/
@@ -65,5 +65,5 @@
   - name: Set cache pressure.
     command: /sbin/sysctl vm.vfs_cache_pressure={{ vfs_cache_pressure }}
 
-  when: (vfs_cache_pressure != false) and
-        (sysctl_settings.stdout.find('vm.vfs_cache_pressure') != -1)
+  # vfs_cache_pressure = 0 is a perfectly legitimate value
+  when: sysctl_settings.stdout.find('vm.vfs_cache_pressure') != -1
