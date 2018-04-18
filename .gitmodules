@@ -1,6 +1,6 @@
 [submodule "ansible/playbooks/roles/ansible-ssh-hardening"]
-	path = ansible/roles/ansible-ssh-hardening
+	path = ansible-basic-machine-setup-with-docker/roles/ansible-ssh-hardening
 	url = https://github.com/dev-sec/ansible-ssh-hardening.git
 [submodule "ansible/roles/ansible-docker"]
-	path = ansible/roles/ansible-docker
+	path = ansible-basic-machine-setup-with-docker/roles/ansible-docker
 	url = https://github.com/nickjj/ansible-docker.git
