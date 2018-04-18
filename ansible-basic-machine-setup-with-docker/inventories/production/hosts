@@ -7,4 +7,4 @@
 #   - A hostname/ip can be a member of multiple groups
 
 [shadowsocks-servers]
-ccshadowsocks2   ansible_ssh_user=root
+ccshadowsocks   ansible_ssh_user=root
