@@ -65,4 +65,8 @@
         name: secure-ssh
 
     # pull shadowsocks container
+    - name: Deploy docker container for shadowsocks.
+      include_role:
+        name: deploy-docker-shadowsocks-libev
+
     # adjust the logging

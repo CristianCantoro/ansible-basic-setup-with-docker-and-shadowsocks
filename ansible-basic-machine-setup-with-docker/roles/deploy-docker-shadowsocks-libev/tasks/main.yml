@@ -1,0 +1,27 @@
+---
+# tasks file for deploy-docker-shadowsocks-libev
+- name: Run with inline v1 compose
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - docker_service:
+        project_name: compose
+        definition:
+          shadowsocks-server:
+            image: easypi/shadowsocks-libev
+            ports:
+              - "{{ shadowsocks_server_port }}:{{ shadowsocks_server_port }}/tcp"
+              - "{{ shadowsocks_server_port }}:{{ shadowsocks_server_port }}/udp"
+            environment:
+              - METHOD={{ shadowsocks_server_encryption_method }}
+              - PASSWORD={{ shadowsocks_server_password }}
+            restart: always
+      register: output
+
+    - debug:
+        var: output
+
+    - assert:
+        that:
+          - "shadowsocks-server.compose_shadowsocks-server_1.state.running"
