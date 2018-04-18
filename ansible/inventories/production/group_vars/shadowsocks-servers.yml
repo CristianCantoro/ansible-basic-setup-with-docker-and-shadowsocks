@@ -16,3 +16,14 @@ shadowsocks_user: shadowsocks
 # role 'ssh-secure'
 ssh_server_ports: ['29808']
 ssh_client_port: '29808'
+
+# role 'ansible-docker'
+## Do you want to install Community Edition ('ce') or Enterprise Edition ('ee')?
+docker_edition: "ce"
+
+## Do you want to install Docker through the "stable" or "edge" channel?
+## Stable gets updated every quarter and Edge gets updated every month.
+docker_channel: "edge"
+
+## What version of Docker do you want to install?
+#docker_version: "18.03.0"

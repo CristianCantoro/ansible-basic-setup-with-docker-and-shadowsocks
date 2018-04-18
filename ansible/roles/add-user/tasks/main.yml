@@ -4,5 +4,5 @@
   user:
     name: "{{ new_user }}"
     shell: /bin/bash
-    groups: sudo
+    groups: sudo, docker
     append: yes
