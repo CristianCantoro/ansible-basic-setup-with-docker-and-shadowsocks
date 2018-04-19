@@ -53,3 +53,6 @@
       autoclean: yes
 
   when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '14.04'
+
+- name: upgrade all packages to the latest version
+  apt: update_cache=yes upgrade=full
