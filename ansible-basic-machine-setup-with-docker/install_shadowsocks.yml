@@ -58,8 +58,9 @@
       vars:
         new_user: "{{ shadowsocks_user }}"
 
-    # TODO: set new user password
     # TODO: add SSH filtering by country
+    # TODO: copy SSH key to shadowsocks' user
+
     - name: Secure SSH.
       include_role:
         name: secure-ssh

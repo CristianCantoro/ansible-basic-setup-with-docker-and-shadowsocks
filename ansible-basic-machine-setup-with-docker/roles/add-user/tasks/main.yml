@@ -1,8 +1,28 @@
 ---
-# Add shadowsocks user
+# Add new user
 - name: Add shadowsocks user.
   user:
     name: "{{ new_user }}"
     shell: /bin/bash
     groups: sudo, docker
     append: yes
+
+# set new user password, if update_user_password is true
+- block:
+  - name: Generate random password.
+    vars:
+      user_password: "{{ lookup('password', '/dev/null') }}"
+
+
+  - debug:
+      var: user_password
+      verbosity: 2
+
+  - name: Update user password.
+    user:
+      name: "{{ new_user }}"
+      password: "{{ user_password|password_hash('sha512') }}"
+      update_password: always
+
+  # https://stackoverflow.com/questions/37888760/
+  when update_user_password|default(false)|bool == true

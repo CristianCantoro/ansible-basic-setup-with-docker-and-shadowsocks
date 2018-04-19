@@ -26,6 +26,7 @@ docker_version: "18.03.0"
 
 # role: 'add-user'
 shadowsocks_user: shadowsocks
+update_user_password: true
 
 # role 'ssh-secure'
 ssh_server_ports: ['29808']
