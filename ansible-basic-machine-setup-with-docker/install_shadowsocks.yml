@@ -22,6 +22,9 @@
       include_role:
         name: swap
 
+    # TODO: resize boot partition
+    # TODO: move boot partion to /
+
     - name: Upgrade system.
       include_role:
         name: upgrade-release
