@@ -1,7 +1,7 @@
 ---
 # fix issues with locales
 - name: Ensure /etc/locale.gen exists.
-  file: path=/etc/locale.gen state=touch
+  file: path=/etc/locale.gen state=file
 
 - name: Ensure locales are listed in /etc/locale.gen.
   lineinfile:
