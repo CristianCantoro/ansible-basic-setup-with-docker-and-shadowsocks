@@ -13,15 +13,33 @@
 # only if /.swapfile is not present
 - block:
 
-  # read config, create swapfile and make it 600
-  - name: Allocate '/.swapfile'.
-    command: /usr/bin/fallocate -l "{{ swapfile_size }}" "{{ swapfile_path }}" creates="{{ swapfile_path }}"
-  - name: Changing permissions of swapfile to 600
+  # determine filesystem tipe of root directory
+  - name: Determine filesystem tipe of root directory.
+    command: findmnt -n -o FSTYPE -T /home
+    register: root_fstype
+
+  # read config, create swapfile
+  - block:
+    - name: Allocate '/.swapfile'.
+      command: /bin/dd if=/dev/zero of="{{ swapfile_path }}" conv=notrunc bs="{{ swapfile_size }}" count=1
+      args:
+        creates: "{{ swapfile_path }}"
+      when: root_fstype is success and (root_fstype.stdout == 'ext2')
+
+    - name: Allocate '/.swapfile'.
+      command: /usr/bin/fallocate -l "{{ swapfile_size }}" "{{ swapfile_path }}"
+      args:
+        creates: "{{ swapfile_path }}"
+      when: root_fstype is success and (root_fstype.stdout == 'ext3' or root_fstype.stdout == 'ext4')
+
+  # set permissions
+  - name: Permissions of swapfile are 600
     file: dest="{{ swapfile_path }}" mode=600
 
   # make /.swapfile a swap partition and activate it
   - name: Make swapfile a swap space.
     command: /sbin/mkswap "{{ swapfile_path }}"
+
   - name: Activate swapfile as a swap space.
     command: /sbin/swapon "{{ swapfile_path }}"
 
@@ -29,11 +47,28 @@
   - name: Update /etc/fstab to make swapfile permanent.
     blockinfile:
       path: /etc/fstab
+      backup: yes
       block: |
         # make swapfile permanent
         "{{ swapfile_path }}   none    swap    sw    0   0"
 
   when: swapfile.stat.exists == False
+  rescue:
+    - debug:
+       msg: 'Error caught, deactivating and deleting swapfile (if it exists)'
+
+    - stat: path="{{ swapfile_path }}"
+      register: swapfile
+
+    - name: Deactivate swapfile
+      command: swapoff "{{ swapfile_path }}" || true
+      when: swapfile.stat.exists == True
+    - name: Remove swapfile
+      file: path="{{ swapfile_path }}" state=absent
+      when: swapfile.stat.exists == True
+
+    - fail:
+        msg: Error caught, deactivating and deleting {{ swapfile_path }}
 
 - name: Read sysctl settings.
   command: /sbin/sysctl -a
