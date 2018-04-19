@@ -54,5 +54,9 @@
 
   when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '14.04'
 
+- name: Remove dependencies that are no longer required
+  apt:
+    autoremove: yes
+
 - name: upgrade all packages to the latest version
   apt: update_cache=yes upgrade=full
