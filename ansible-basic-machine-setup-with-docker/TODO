@@ -1,0 +1,10 @@
+umount /boot
+swapoff /dev/sda2
+
+fdisk /dev/sda
+delete partition swap
+new partition
+
+e2fsck -f /dev/sda1
+resize2fs /dev/sda1
+
