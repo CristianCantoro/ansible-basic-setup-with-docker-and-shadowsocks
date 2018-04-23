@@ -39,11 +39,11 @@
         register: ram_size
 
       - set_fact:
-          ram_size: "{{ ram_size.stdout }}"
+          ram_size: "{{ ram_size.stdout|float }}"
 
       - name: Calculate block size.
         set_fact:
-          block_size: "{{ (ram_size|float)/2.0| int }}"
+          block_size: "{{ (ram_size|float)*(block_fraction_of_ram|float) }}"
 
       - name: Calculate block count.
         shell: printf %.0f "{{ (swapfile_size_bytes|float)/(block_size|float) }}"

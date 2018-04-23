@@ -1,0 +1,4 @@
+---
+# global vars
+# block size for dd set to this fraction of RAM
+block_fraction_of_ram: "0.125"
