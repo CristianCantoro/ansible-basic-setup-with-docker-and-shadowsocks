@@ -1,0 +1,3 @@
+---
+# defaults file for add-user
+force_reboot: false

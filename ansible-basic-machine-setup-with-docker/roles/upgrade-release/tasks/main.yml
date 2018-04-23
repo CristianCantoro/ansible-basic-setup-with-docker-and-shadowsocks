@@ -1,5 +1,5 @@
 ---
-- name: update packages
+- name: Update packages.
   apt: update_cache=yes
 # do-release-upgrade with Ansible
 # See:
@@ -15,7 +15,7 @@
   # Now would be a good time to take a backup if you can trigger an
   # automated backup!
 
-  - name: remove the EOL message of the day if one exists.
+  - name: Remove the EOL message of the day if one exists.
     file:
       path: "{{ item }}"
       state: absent
@@ -23,26 +23,18 @@
       - /etc/update-motd.d/99-esm
       - /run/motd.dynamic
 
-  - name: upgrade all packages to the latest version
+  - name: Upgrade all packages to the latest version
     apt: update_cache=yes upgrade=full
 
-  - name: ensure update-manager-core is installed.
+  - name: Ensure update-manager-core is installed.
     apt: name=update-manager-core state=present
 
-  - name: run do-release-upgrade non-interactively.
+  - name: Run do-release-upgrade non-interactively.
     command: do-release-upgrade -f DistUpgradeViewNonInteractive
 
-  - name: reboot the server.
-    command: reboot
-    async: 0
-    poll: 0
-
-  - name: wait for server to reboot.
-    wait_for:
-      host: "{{ ansible_ssh_host }}"
-      state: started
-    connection: local
-    become: no
+  - name: Reboot the server and wait for it come back up.
+    include_role:
+      name: reboot
 
   - name: Remove dependencies that are no longer required
     apt:
@@ -60,3 +52,8 @@
 
 - name: upgrade all packages to the latest version
   apt: update_cache=yes upgrade=full
+
+- name: Reboot the server and wait for it come back up.
+  include_role:
+    name: reboot
+  when: "force_reboot|default(false)|bool == true"
