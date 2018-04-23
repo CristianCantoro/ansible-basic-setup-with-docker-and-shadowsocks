@@ -20,10 +20,43 @@
 
   # read config, create swapfile
   - block:
-    - name: Allocate '/.swapfile'.
-      command: /bin/dd if=/dev/zero of="{{ swapfile_path }}" conv=notrunc bs="{{ swapfile_size }}" count=1
-      args:
-        creates: "{{ swapfile_path }}"
+    - block:
+      - name: Convert swapfile_size to bytes
+        shell: >
+          echo "{{ swapfile_size }}" | \
+          awk '/[0-9]B?$/{printf "%u\n", $1;next};
+               /[tT]B?$/{printf "%u\n", $1*(1024*1024*1024*1024);next};
+               /[gG]B?$/{printf "%u\n", $1*(1024*1024*1024);next};
+               /[mM]B?$/{printf "%u\n", $1*(1024*1024);next};
+               /[kK]B?$/{printf "%u\n", $1*1024;next};'
+        register: swapfile_size_bytes
+
+      - set_fact:
+          swapfile_size_bytes: "{{ swapfile_size_bytes.stdout }}"
+
+      - name: Get system RAM size.
+        shell: free -b | grep -E '^Mem:' | awk '{print $2}'
+        register: ram_size
+
+      - set_fact:
+          ram_size: "{{ ram_size.stdout }}"
+
+      - name: Calculate block size.
+        set_fact:
+          block_size: "{{ (ram_size|float)/2.0| int }}"
+
+      - name: Calculate block count.
+        shell: printf %.0f "{{ (swapfile_size_bytes|float)/(block_size|float) }}"
+        register: block_count
+
+      - set_fact:
+          block_count: "{{ block_count.stdout|int }}"
+
+      - name: Allocate '/.swapfile'.
+        command: /bin/dd if=/dev/zero of="{{ swapfile_path }}" conv=notrunc bs="{{ block_size|int }}" count="{{ block_count|int }}"
+        args:
+          creates: "{{ swapfile_path }}"
+
       when: root_fstype is success and (root_fstype.stdout == 'ext2')
 
     - name: Allocate '/.swapfile'.
