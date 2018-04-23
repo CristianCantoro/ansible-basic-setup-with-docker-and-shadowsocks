@@ -10,9 +10,8 @@
 # set new user password, if update_user_password is true
 - block:
   - name: Generate random password.
-    vars:
-      user_password: "{{ lookup('password', '/dev/null') }}"
-
+    set_fact:
+      user_password: "{{ lookup('password', '/dev/null' length=32 )}}"
 
   - debug:
       var: user_password
@@ -25,4 +24,4 @@
       update_password: always
 
   # https://stackoverflow.com/questions/37888760/
-  when update_user_password|default(false)|bool == true
+  when: "update_user_password|default(false)|bool == true"
