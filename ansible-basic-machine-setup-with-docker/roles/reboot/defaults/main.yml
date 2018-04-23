@@ -1,0 +1,5 @@
+---
+# defaults file for reboot
+reboot_pause: 15
+reboot_delay: 30
+reboot_timeout: 120

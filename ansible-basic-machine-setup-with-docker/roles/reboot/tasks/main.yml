@@ -1,0 +1,20 @@
+---
+# tasks file for reboot
+- name: Reboot the server.
+  command: reboot
+  async: 0
+  poll: 0
+
+# https://gist.github.com/infernix/a968f23c4f4e1d6723e4
+# This pause is mandatory, otherwise the existing control connection gets reused!
+- pause:
+    seconds: "{{ reboot_pause }}"
+
+- name: wait for server to reboot.
+  wait_for:
+    host: "{{ ansible_ssh_host }}"
+    state: started
+    delay: "{{ reboot_delay }}"
+    timeout: "{{ reboot_timeout }}"
+  connection: local
+  become: no
