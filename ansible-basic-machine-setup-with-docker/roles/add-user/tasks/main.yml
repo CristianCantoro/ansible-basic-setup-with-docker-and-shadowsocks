@@ -11,11 +11,11 @@
 - block:
   - name: Generate random password.
     set_fact:
-      user_password: "{{ lookup('password', '/dev/null' length=32 )}}"
+      user_password: "{{ lookup('password', '/dev/null', length=32 )}}"
 
   - debug:
       var: user_password
-      verbosity: 2
+      verbosity: 0
 
   - name: Update user password.
     user:
@@ -25,3 +25,9 @@
 
   # https://stackoverflow.com/questions/37888760/
   when: "update_user_password|default(false)|bool == true"
+
+- name: Set authorized key for user shadowsocks copying it from current user
+  authorized_key:
+    user: "{{ new_user }}"
+    state: present
+    key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
