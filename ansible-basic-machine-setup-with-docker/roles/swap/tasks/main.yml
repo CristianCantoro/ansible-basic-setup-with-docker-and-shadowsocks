@@ -83,7 +83,7 @@
       backup: yes
       block: |
         # make swapfile permanent
-        "{{ swapfile_path }}   none    swap    sw    0   0"
+        {{ swapfile_path }}   none    swap    sw    0   0
 
   when: swapfile.stat.exists == False
   rescue:
