@@ -22,8 +22,20 @@
     dest: /usr/local/bin/update-geoip
 
 ### Update ALLOWED_COUNTRIES
+- name: Ensure allowed countries are set in /usr/local/bin/sshfilter.
+  lineinfile:
+    dest: /usr/local/bin/sshfilter
+    regexp: 'ALLOW_COUNTRIES'
+    line: "ALLOW_COUNTRIES='{{ allow_countries }}'"
+    state: present
 
-### Update ALLOWED_COUNTRIES
+### Update LOGDENY_FACILITY
+- name: Ensure allowed countries are set in /usr/local/bin/sshfilter.
+  lineinfile:
+    dest: /usr/local/bin/sshfilter
+    regexp: 'LOG_FACILITY'
+    line: "LOG_FACILITY='{{ log_facility }}'"
+    state: present
 
 # 5. Update the geoip database
 - name: Update the geoip database.
