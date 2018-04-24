@@ -29,23 +29,7 @@
       include_role:
         name: upgrade-release
 
-    # Install basic packages:
-    #   - htop
-    #   - tree
-    #   - lynx
-    #   - colordiff
-    #   - tmux
-    #   - zsh
-    #   - git-core
-    #   - molly-guard
-    #   - realpath
-    #   - ntp
-    #   - ntp-doc
-    #   - ntpdate
-    #   - gpgv2
-    #   - apt-transport-https
-    #   - ca-certificates
-    #   - software-properties-common
+    # install basic packages
     - name: Install basic packages.
       include_role:
         name: install-basics
@@ -55,15 +39,14 @@
       include_role:
         name: ansible-docker
 
+    # add shadowsocks user
     - name: Add shadowsocks user.
       include_role:
         name: add-user
       vars:
         new_user: "{{ shadowsocks_user }}"
 
-    # TODO: copy SSH key to shadowsocks' user
-    # TODO: add SSH filtering by country
-
+    # secure SSH
     - name: Secure SSH.
       include_role:
         name: secure-ssh
@@ -73,4 +56,4 @@
       include_role:
         name: deploy-docker-shadowsocks-libev
 
-    # adjust the logging
+    # TODO: adjust the logging
