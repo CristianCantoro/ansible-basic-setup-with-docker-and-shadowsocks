@@ -1,0 +1,5 @@
+---
+# defaults file for ssh-filter
+geoip_packages:
+  - geoip-bin
+  - geoip-database

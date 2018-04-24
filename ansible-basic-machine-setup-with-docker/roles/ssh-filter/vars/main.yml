@@ -1,0 +1,6 @@
+---
+# vars file for ssh-filter
+test_geoiplookup_ip: "8.8.8.8"
+test_geoiplookup_ip_geolocation: "US"
+test_sshfilter_denied_ip: "8.8.8.8"
+test_sshfilter_allowed_ip: "90.147.0.0"

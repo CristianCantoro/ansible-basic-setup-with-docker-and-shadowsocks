@@ -1,0 +1,95 @@
+---
+# task for role ssh-filter
+# 1. Install geoip packages.
+- name: update packages
+  apt: update_cache=yes
+
+- name: Install geoip packages.
+  apt:
+    name={{item}}
+    state=present
+  with_items: "{{ geoip_packages }}"
+
+# 4. Copy executables to /usr/local/bin/
+- name: Copy sshfilter executable to /usr/local/bin/sshfilter.
+  copy:
+    src: ../../files/ssh-geoip-filter/files/usr/local/bin/sshfilter
+    dest: /usr/local/bin/sshfilter
+
+- name: Copy update-geoip executable to /usr/local/bin/update-geoip.
+  copy:
+    src: ../../files/ssh-geoip-filter/files/usr/local/bin/update-geoip
+    dest: /usr/local/bin/update-geoip
+
+### Update ALLOWED_COUNTRIES
+
+### Update ALLOWED_COUNTRIES
+
+# 5. Update the geoip database
+- name: Update the geoip database.
+  command: /usr/local/bin/update-geoip
+
+# 6. Test if 'sshfilter' is working
+
+# 6a. Test if geoiplookup is working
+#
+# Remove leading and trailing space:
+# https://stackoverflow.com/q/369758/2377454
+- name: Test IP "{{ test_geoiplookup_ip }}" with geoiplookup.
+  command: >
+   geoiplookup {{ test_geoiplookup_ip }} | \
+    awk -F':' '{print $2}'  | \
+    sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | \
+    cut -c1-2
+  register: geoiplookup_test
+
+- name: Check that the geoip test result is the same as expected.
+  fail:
+    when: "{{ geoiplookup_test.stdout }}" != "{{ test_geoiplookup_ip_geolocation }}"
+
+# 6b. Test if sshfilter is working
+#
+# $ sshfilter 8.8.8.8
+# DENY sshd connection from 8.8.8.8 (US)
+- name: Test IP "{{ test_sshfilter_denied_ip }}" with geoiplookup.
+  command: /usr/local/bin/sshfilter -v "{{ test_sshfilter_denied_ip }}"
+  ignore_errors: true
+  register: sshfilter_denied_test
+
+- name: Check that the sshfilter test result is the same as expected.
+  fail:
+    when: sshfilter_denied_test.stdout.find('DENY sshd connection from "{{ test_sshfilter_denied_ip }}"') != -1
+
+# $ sshfilter 90.147.0.1
+# ALLOW sshd connection from 90.147.0.1 (IT)
+- name: Test IP "{{ test_sshfilter_allowed_ip }}" with geoiplookup.
+  command: /usr/local/bin/sshfilter -v "{{ test_sshfilter_allowed_ip }}"
+  register: sshfilter_allowed_test
+
+- name: Check that the sshfilter test result is the same as expected.
+  fail:
+    when: sshfilter_denied_test.stdout.find('ALLOW sshd connection from "{{ test_sshfilter_allowed_ip }}"') != -1
+
+# 7. Copy TCP wrappers to /etc/hosts.{allow,deny}
+- name: Copy hosts.allow to /etc/hosts.allow.
+  copy:
+    src: ../../files/ssh-geoip-filter/files/etc/hosts.allow
+    dest: /etc/hosts.allow
+
+- name: Copy hosts.deny to /etc/hosts.deny.
+  copy:
+    src: ../../files/ssh-geoip-filter/files/etc/hosts.deny
+    dest: /etc/hosts.deny
+
+# 8. Add a crontab job (as root) to update the geoip database
+- name: Copy hosts.deny to /etc/hosts.deny.
+  command: >
+    (crontab -l && echo '
+    # Update GeoIP database every 15 days
+    05  06  */15   *    *     /usr/local/bin/update-geoip >> /var/log/geoip.log
+    ') | sudo crontab -
+
+- name: Check that crontab has a line with '/usr/local/bin/update-geoip'.
+  command: >
+    crontab -l | \
+      grep -E '^05\s+06\s+\*/15\s+\*\s+\*\s+/usr/local/bin/update-geoip\s+>>\s+/var/log/geoip.log$'
