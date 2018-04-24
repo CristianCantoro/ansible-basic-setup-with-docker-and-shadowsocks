@@ -22,7 +22,7 @@
   - block:
     - block:
       - name: Convert swapfile_size to bytes
-        shell: >
+        command: >
           echo "{{ swapfile_size }}" | \
           awk '/[0-9]B?$/{printf "%u\n", $1;next};
                /[tT]B?$/{printf "%u\n", $1*(1024*1024*1024*1024);next};
@@ -35,7 +35,7 @@
           swapfile_size_bytes: "{{ swapfile_size_bytes.stdout }}"
 
       - name: Get system RAM size.
-        shell: free -b | grep -E '^Mem:' | awk '{print $2}'
+        command: free -b | grep -E '^Mem:' | awk '{print $2}'
         register: ram_size
 
       - set_fact:
@@ -46,7 +46,7 @@
           block_size: "{{ (ram_size|float)*(block_fraction_of_ram|float) }}"
 
       - name: Calculate block count.
-        shell: printf %.0f "{{ (swapfile_size_bytes|float)/(block_size|float) }}"
+        command: printf %.0f "{{ (swapfile_size_bytes|float)/(block_size|float) }}"
         register: block_count
 
       - set_fact:
