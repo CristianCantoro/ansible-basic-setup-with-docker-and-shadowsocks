@@ -22,3 +22,9 @@
     regexp: '^(\# )?X11Forwarding\s+yes$'
     line: 'X11Forwarding no'
     state: present
+  notify: restart sshd
+
+# Filter ssh connections base of IP address location
+- name: Filter ssh connections base of IP address location.
+  import_role:
+    name: ssh-filter

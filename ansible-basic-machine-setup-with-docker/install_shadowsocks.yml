@@ -23,7 +23,7 @@
         name: swap
 
     # TODO: resize boot partition
-    # TODO: move boot partion to /
+    # TODO: move boot partition to /
 
     - name: Upgrade system.
       include_role:
@@ -55,5 +55,3 @@
     - name: Deploy docker container for shadowsocks.
       include_role:
         name: deploy-docker-shadowsocks-libev
-
-    # TODO: adjust the logging

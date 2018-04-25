@@ -13,29 +13,26 @@
 # 4. Copy executables to /usr/local/bin/
 - name: Copy sshfilter executable to /usr/local/bin/sshfilter.
   copy:
-    src: ../../files/ssh-geoip-filter/files/usr/local/bin/sshfilter
+    src: ./files/ssh-geoip-filter/files/usr/local/bin/sshfilter
     dest: /usr/local/bin/sshfilter
+    owner: root
+    group: root
+    mode: 0775
 
 - name: Copy update-geoip executable to /usr/local/bin/update-geoip.
   copy:
-    src: ../../files/ssh-geoip-filter/files/usr/local/bin/update-geoip
+    src: ./files/ssh-geoip-filter/files/usr/local/bin/update-geoip
     dest: /usr/local/bin/update-geoip
+    owner: root
+    group: root
+    mode: 0775
 
-### Update ALLOWED_COUNTRIES
-- name: Ensure allowed countries are set in /usr/local/bin/sshfilter.
-  lineinfile:
-    dest: /usr/local/bin/sshfilter
-    regexp: 'ALLOW_COUNTRIES'
-    line: "ALLOW_COUNTRIES='{{ allow_countries }}'"
-    state: present
-
-### Update LOGDENY_FACILITY
-- name: Ensure allowed countries are set in /usr/local/bin/sshfilter.
-  lineinfile:
-    dest: /usr/local/bin/sshfilter
-    regexp: 'LOG_FACILITY'
-    line: "LOG_FACILITY='{{ log_facility }}'"
-    state: present
+### Create configuration
+- name: Ensure configuration for sshfilter is set.
+  template:
+    src: ./templates/etc/sshfilter.conf.j2
+    dest: /etc/sshfilter.conf
+    mode: 0644
 
 # 5. Update the geoip database
 - name: Update the geoip database.
@@ -48,16 +45,17 @@
 # Remove leading and trailing space:
 # https://stackoverflow.com/q/369758/2377454
 - name: Test IP "{{ test_geoiplookup_ip }}" with geoiplookup.
-  command: >
-   geoiplookup {{ test_geoiplookup_ip }} | \
-    awk -F':' '{print $2}'  | \
-    sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | \
-    cut -c1-2
+  shell: >
+    /usr/bin/geoiplookup "{{ test_geoiplookup_ip }}" | \
+      awk -F':' '{print $2}'  | \
+      sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' | \
+      cut -c1-2
   register: geoiplookup_test
 
 - name: Check that the geoip test result is the same as expected.
   fail:
-    when: "{{ geoiplookup_test.stdout }}" != "{{ test_geoiplookup_ip_geolocation }}"
+    msg: "geoiplookup test failed ({{ geoiplookup_test.stdout }} != {{ test_geoiplookup_ip_geolocation) }})"
+  when: geoiplookup_test.stdout != test_geoiplookup_ip_geolocation
 
 # 6b. Test if sshfilter is working
 #
@@ -68,9 +66,10 @@
   ignore_errors: true
   register: sshfilter_denied_test
 
-- name: Check that the sshfilter test result is the same as expected.
+- name: Check that the DENY sshfilter test result is the same as expected.
   fail:
-    when: sshfilter_denied_test.stdout.find('DENY sshd connection from "{{ test_sshfilter_denied_ip }}"') != -1
+    msg: "SSH filter (DENY) failed: {{ sshfilter_denied_test.stdout }}"
+  when: sshfilter_denied_test.stdout.find('DENY sshd connection from ' + test_sshfilter_denied_ip) != -1
 
 # $ sshfilter 90.147.0.1
 # ALLOW sshd connection from 90.147.0.1 (IT)
@@ -80,28 +79,27 @@
 
 - name: Check that the sshfilter test result is the same as expected.
   fail:
-    when: sshfilter_denied_test.stdout.find('ALLOW sshd connection from "{{ test_sshfilter_allowed_ip }}"') != -1
+    msg: "SSH filter (ALLOW) failed: {{ sshfilter_allowed_test.stdout }}"
+  when: sshfilter_allowed_test.stdout.find('ALLOW sshd connection from ' + test_sshfilter_allowed_ip) != -1
 
 # 7. Copy TCP wrappers to /etc/hosts.{allow,deny}
 - name: Copy hosts.allow to /etc/hosts.allow.
   copy:
-    src: ../../files/ssh-geoip-filter/files/etc/hosts.allow
+    src: ./files/ssh-geoip-filter/files/etc/hosts.allow
     dest: /etc/hosts.allow
 
 - name: Copy hosts.deny to /etc/hosts.deny.
   copy:
-    src: ../../files/ssh-geoip-filter/files/etc/hosts.deny
+    src: ./files/ssh-geoip-filter/files/etc/hosts.deny
     dest: /etc/hosts.deny
 
 # 8. Add a crontab job (as root) to update the geoip database
-- name: Copy hosts.deny to /etc/hosts.deny.
-  command: >
-    (crontab -l && echo '
-    # Update GeoIP database every 15 days
-    05  06  */15   *    *     /usr/local/bin/update-geoip >> /var/log/geoip.log
-    ') | sudo crontab -
-
-- name: Check that crontab has a line with '/usr/local/bin/update-geoip'.
-  command: >
-    crontab -l | \
-      grep -E '^05\s+06\s+\*/15\s+\*\s+\*\s+/usr/local/bin/update-geoip\s+>>\s+/var/log/geoip.log$'
+- name: Add a cron job to update the geoip database.
+  cron:
+    name: "Update geoip database"
+    job: "/usr/local/bin/update-geoip >> /var/log/geoip.log"
+    minute: "{{ cron_task.schedule.minute }}"
+    hour: "{{ cron_task.schedule.hour }}"
+    day: "{{ cron_task.schedule.day }}"
+    month: "{{ cron_task.schedule.month }}"
+    weekday: "{{ cron_task.schedule.weekday }}"

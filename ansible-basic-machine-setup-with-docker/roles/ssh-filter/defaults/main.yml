@@ -3,7 +3,18 @@
 geoip_packages:
   - geoip-bin
   - geoip-database
+
 # UPPERCASE space-separated country codes to ACCEPT
 allow_countries: "DE IT AT CH NL CA ES"
+
 # log facility, see man logger
 log_facility: "authpriv.notice"
+
+# cron task parameters
+cron_task:
+  schedule:
+    minute:  "05"
+    hour:    "06"
+    day:     "*/15"
+    month:   "*"
+    weekday: "*"
