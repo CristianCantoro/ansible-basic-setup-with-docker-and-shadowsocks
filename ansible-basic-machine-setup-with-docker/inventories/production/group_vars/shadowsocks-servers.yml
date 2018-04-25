@@ -1,6 +1,9 @@
 ---
 ## SHADOWSOCKS variables
 
+# role: 'add-user' (root)
+update_root_password: true
+
 # role: 'locales'
 langs:
   - es_ES.UTF-8 UTF-8
@@ -24,7 +27,7 @@ docker_channel: "stable"
 ## What version of Docker do you want to install?
 docker_version: "18.03.0"
 
-# role: 'add-user'
+# role: 'add-user' (shadowsocks)
 shadowsocks_user: shadowsocks
 update_user_password: false
 

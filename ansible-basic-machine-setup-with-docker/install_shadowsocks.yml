@@ -8,6 +8,14 @@
       playbook:
         version: 0.0.2
   tasks:
+
+    - name: Update root password and add SSH key.
+      include_role:
+        name: add-user
+      vars:
+        new_user: root
+        update_user_password: "{{ update_root_password }}"
+
     # activate locales:
     # langs:
     #   - it_IT.UTF-8 UTF-8
@@ -51,7 +59,7 @@
       include_role:
         name: secure-ssh
 
-    # pull shadowsocks container
+    # FIXME: pull shadowsocks container
     - name: Deploy docker container for shadowsocks.
       include_role:
         name: deploy-docker-shadowsocks-libev
