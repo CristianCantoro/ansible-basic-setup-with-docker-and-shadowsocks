@@ -2,7 +2,7 @@
 ## SHADOWSOCKS variables
 
 # role: 'add-user' (root)
-update_root_password: true
+update_root_password: false
 
 # role: 'locales'
 langs:
