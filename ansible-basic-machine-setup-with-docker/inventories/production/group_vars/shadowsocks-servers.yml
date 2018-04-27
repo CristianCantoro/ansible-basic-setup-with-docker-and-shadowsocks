@@ -10,6 +10,9 @@ langs:
   - en_US.UTF-8 UTF-8
   - it_IT.UTF-8 UTF-8
 
+# role 'set-hostname'
+hostname: shadowserver
+
 # role: 'swap'
 swapfile_size: 2G
 

@@ -26,6 +26,13 @@
         name: locales
     - meta: flush_handlers
 
+    - name: Set new hostname
+      include_role:
+        name: set-hostname
+      vars:
+        new_hostname: "{{ hostname }}"
+
+
     - name: Add swap to the system.
       include_role:
         name: swap

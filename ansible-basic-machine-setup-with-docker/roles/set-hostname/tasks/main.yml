@@ -1,0 +1,12 @@
+---
+# tasks file for set-hostname
+- name: Set system's hostname.
+  hostname:
+    name: "{{ new_hostname }}"
+
+# modify /etc/hosts
+- name: Ensure /etc/hostname file has the same hostname.
+  template:
+    src: ./templates/etc/hostname.j2
+    dest: /etc/hostname
+    mode: 0644
