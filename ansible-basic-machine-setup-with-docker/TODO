@@ -1,3 +1,5 @@
+https://access.redhat.com/articles/1190213
+
 umount /boot
 swapoff /dev/sda2
 
