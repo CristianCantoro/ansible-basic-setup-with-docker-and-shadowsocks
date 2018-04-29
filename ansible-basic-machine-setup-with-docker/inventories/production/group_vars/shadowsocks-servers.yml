@@ -28,7 +28,7 @@ docker_edition: "ce"
 docker_channel: "stable"
 
 ## What version of Docker do you want to install?
-docker_version: "18.03.0"
+docker_version: "18.03.1"
 
 # role: 'add-user' (shadowsocks)
 shadowsocks_user: shadowsocks
