@@ -1,0 +1,18 @@
+---
+# tasks file for set-ufw
+- name: Set policy and enable UFW.
+  ufw:
+    state: enabled
+    policy: "{{ policy }}"
+
+- name: Set logging.
+  ufw:
+    logging: "{{ logging }}"
+
+- name: Set custom UFW ports.
+  ufw:
+    rule: "{{ item.rule }}"
+    port: "{{ item.port }}"
+    proto: "{{ item.proto }}"
+  with_items: "{{ custom_ports }}"
+  when: custom_ports

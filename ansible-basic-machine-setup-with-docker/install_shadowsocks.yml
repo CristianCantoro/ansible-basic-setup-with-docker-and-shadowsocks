@@ -66,6 +66,15 @@
       include_role:
         name: secure-ssh
 
+    # Enable UFW
+    - name: Enable UFW.
+      include_role:
+        name: set-ufw
+      vars:
+        policy: "{{ ufw_policy }}"
+        logging: "{{ ufw_logging }}"
+        custom_ports: "{{ ufw_custom_ports }}"
+
     # FIXME: pull shadowsocks container
     - name: Deploy docker container for shadowsocks.
       include_role:

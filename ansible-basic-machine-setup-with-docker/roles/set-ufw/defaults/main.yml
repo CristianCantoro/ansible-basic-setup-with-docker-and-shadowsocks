@@ -1,0 +1,15 @@
+---
+# defaults file for set-ufw
+
+# UFW polocy
+policy: deny
+
+# this should been 'on' or 'off'
+logging: off
+
+# this should a list of dictionaries:
+# e.g.
+# custom_ports
+#   - {rule: allow, port: 443, proto: any}
+custom_ports: false
+
