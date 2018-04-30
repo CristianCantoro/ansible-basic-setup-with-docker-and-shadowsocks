@@ -2,3 +2,4 @@
 # defaults file for add-user
 new_user: user
 update_user_password: false
+new_groups: ['sudo']

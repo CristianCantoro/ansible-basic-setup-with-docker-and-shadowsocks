@@ -4,7 +4,7 @@
   user:
     name: "{{ new_user }}"
     shell: /bin/bash
-    groups: sudo, docker
+    groups: "{{ new_groups|join(', ')  }}"
     append: yes
 
 # set new user password, if update_user_password is true
