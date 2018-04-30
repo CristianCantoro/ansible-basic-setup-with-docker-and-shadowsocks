@@ -17,3 +17,4 @@ basic_packages:
   - apt-transport-https
   - ca-certificates
   - software-properties-common
+  - python3-pip

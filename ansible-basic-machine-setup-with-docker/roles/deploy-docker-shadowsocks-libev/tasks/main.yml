@@ -1,27 +1,56 @@
 ---
 # tasks file for deploy-docker-shadowsocks-libev
+
+# Install necessary pip packages.
+# See:
+#   https://github.com/ansible/ansible/issues/20492#issuecomment-313325892
+- name: Upgrade pip to the latest version.
+  pip:
+    name: pip
+    state: latest
+
+- name: Install docker-py and docker-compose pip packages.
+  pip:
+    name: "{{item}}"
+    state: present
+  with_items:
+    - docker-py
+    - docker-compose
+
+- name: Clean-up docker, docker-py, docker-compose pip packages.
+  pip:
+    name: "{{item}}"
+    state: absent
+  with_items:
+    - docker
+    - docker-py
+    - docker-compose
+
+- name: Install docker-py and docker-compose pip packages.
+  pip:
+    name: "{{item}}"
+    state: present
+  with_items:
+    - docker-compose
+
+# Docker compose file with format inline v2
 - name: Run with inline v2 compose
-  hosts: localhost
-  connection: local
-  gather_facts: no
-  tasks:
-    - docker_service:
-        project_name: shadowsocks-server
-        definition:
-          shadowsocks-server:
-            image: easypi/shadowsocks-libev
-            ports:
-              - "{{ shadowsocks_server_port }}:{{ shadowsocks_server_port }}/tcp"
-              - "{{ shadowsocks_server_port }}:{{ shadowsocks_server_port }}/udp"
-            environment:
-              - METHOD={{ shadowsocks_server_encryption_method }}
-              - PASSWORD={{ shadowsocks_server_password }}
-            restart: always
-      register: output
+  docker_service:
+    project_name: shadowsocks
+    definition:
+      server:
+        image: easypi/shadowsocks-libev
+        ports:
+          - "{{ shadowsocks_server_port }}:{{ shadowsocks_server_port }}/tcp"
+          - "{{ shadowsocks_server_port }}:{{ shadowsocks_server_port }}/udp"
+        environment:
+          - METHOD={{ shadowsocks_server_encryption_method }}
+          - PASSWORD={{ shadowsocks_server_password }}
+          - SERVER_PORT={{ shadowsocks_server_port }}
+        restart: always
+  register: docker_compose_output
 
-    - debug:
-        var: output
-
-    - assert:
-        that:
-          - "shadowsocks-server.compose_shadowsocks-server_1.state.running"
+- name: Assert that container is running
+  assert:
+    that:
+      - server.shadowsocks_server_1.state.running

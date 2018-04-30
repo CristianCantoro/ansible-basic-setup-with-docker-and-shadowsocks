@@ -1,9 +1,0 @@
-server:
-  image: easypi/shadowsocks-libev
-  ports:
-    - "{{ shadowsocks_server_port }}:{{ shadowsocks_server_port }}/tcp"
-    - "{{ shadowsocks_server_port }}:{{ shadowsocks_server_port }}/udp"
-  environment:
-    - METHOD={{ shadowsocks_server_encryption_method }}
-    - PASSWORD={{ shadowsocks_server_password }}
-  restart: always
