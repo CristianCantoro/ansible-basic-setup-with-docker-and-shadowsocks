@@ -7,4 +7,5 @@
 #   - A hostname/ip can be a member of multiple groups
 
 [shadowsocks-servers]
-ccshadowsocks   ansible_ssh_user=root ansible_python_interpreter=/usr/bin/python3
+# ccshadowsocks   ansible_ssh_user=root ansible_python_interpreter=/usr/bin/python3
+ccshadowsocks2 	ansible_ssh_user=root ansible_python_interpreter=/usr/bin/python3

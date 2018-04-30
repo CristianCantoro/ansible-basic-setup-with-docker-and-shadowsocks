@@ -3,6 +3,7 @@
 
 # role: 'add-user' (root)
 update_root_password: false
+root_groups: ['sudo']
 
 # role: 'locales'
 langs:
@@ -11,7 +12,7 @@ langs:
   - it_IT.UTF-8 UTF-8
 
 # role 'set-hostname'
-hostname: shadowserver
+hostname: shadowserver2
 
 # role: 'swap'
 swapfile_size: 2G
@@ -31,8 +32,9 @@ docker_channel: "stable"
 docker_version: "18.03.1"
 
 # role: 'add-user' (shadowsocks)
-shadowsocks_user: shadowsocks
-update_user_password: false
+shadowsocks_user: 'shadowsocks'
+shadowsocks_group: ['sudo', 'docker']
+update_shadowsocks_password: true
 
 # role 'ssh-secure'
 ssh_server_ports: ['29808']
