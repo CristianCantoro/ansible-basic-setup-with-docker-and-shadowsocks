@@ -1,0 +1,3 @@
+---
+# defaults file for resize-boot-partition
+new_boot_partition_size: '1GB'

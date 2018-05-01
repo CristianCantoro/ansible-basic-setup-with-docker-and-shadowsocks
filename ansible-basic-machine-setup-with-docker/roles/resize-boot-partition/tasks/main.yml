@@ -1,0 +1,153 @@
+---
+# tasks file for resize-boot-partition
+
+##############################################################################
+#
+# https://access.redhat.com/articles/1190213
+#
+# umount /boot
+# swapoff /dev/sda2
+#
+# fdisk /dev/sda
+# delete partition swap
+# new partition
+#
+# e2fsck -f /dev/sda1
+# resize2fs /dev/sda1
+##############################################################################
+ 
+# Check /boot size partion, if /boot is part of another partition 
+# - e.g. the root partition - boot_partition_size is empty.
+#
+# $ df -h /boot
+# Filesystem      Size  Used Avail Use% Mounted on
+# /dev/sda1        98M   68M   25M  74% /boot
+#
+- name: Check boot size partiton.
+  shell: df '/boot' | grep -E '/boot$' | awk '{print $2}'
+  register: boot_partition_size
+
+- set_fact:
+    boot_partition_size: "{{ boot_partition_size.stdout }}"
+
+# Resize boot partition only if /boot is on a separate partition and the
+# partition size is smaller than the minimum.
+- block:
+
+  - name: Check boot size partiton.
+    shell: df -h '/boot' | grep -E '/boot$' | awk '{print $1}'
+    register: boot_partition_path
+
+  - set_fact:
+      boot_partition_path: "{{ boot_partition_path.stdout }}"
+
+  - name: Get device name from boot partition path.
+    shell: lsblk -no pkname "'{{ boot_partition_path }}'"
+    register: boot_device_name
+
+  - set_fact:
+      device_path: "/dev/{{ boot_device_name.stdout }}"
+
+  # Read device information (always use unit when probing)
+  - parted: device="{{ device_path }}"
+    register: device_info
+
+  - debug:
+      var: device_info
+
+  - name: Check that the "{{ device_path }}" exists.
+    stat:
+      path: "{{ device_path }}"
+      stete: present
+
+  - name: Get boot partition number from boot partition path and boot device.
+    shell: echo {{ boot_partition_path }} | sed -e "s#{{ device_path }}##"
+    register: boot_partition_number
+
+  - set_fact:
+      boot_partition_number: "{{ boot_partition_number.stdout }}"
+
+  - name: Get swap partition number.
+    shell: >
+      fdisk -l "'{{ device_path }}'" | \
+        grep -E "'^{{ device_path }}'" | \
+        grep 'swap' | \
+        awk '{print $1}'  | \
+        sed -e "s#{{ device_path }}##"
+    register: swap_partition_path
+
+  - set_fact:
+      swap_partition_path: "{{ swap_partition_path.stdout }}"
+
+  - name: Get swap partition number.
+    shell: echo "{{ swap_partition_path }}" | sed -e "s#{{ device_path }}##"
+    register: swap_partition_number
+
+  - set_fact:
+      swap_partition_number: "{{ swap_partition_number.stdout }}"
+
+  - name: Assert that swap partition follows boot partition.
+    assert:
+      that:
+        - int(swap_partition_number) + 1 == int(boot_partition_number)
+      msg: "swap partition ({{ swap_partition_path }}) needs to follow boot parition ({{ boot_partition_path }})."
+
+  - name: Convert swapfile_size to bytes.
+    shell: >
+      echo "{{ new_boot_partition_size }}" | \
+      awk '/[0-9]B?$/{printf "%u\n", $1;next};
+           /[tT]B?$/{printf "%u\n", $1*(1024*1024*1024*1024);next};
+           /[gG]B?$/{printf "%u\n", $1*(1024*1024*1024);next};
+           /[mM]B?$/{printf "%u\n", $1*(1024*1024);next};
+           /[kK]B?$/{printf "%u\n", $1*1024;next};'
+    register: new_boot_partition_size_bytes
+
+  # $ fdisk -l /dev/sda
+  # Disk /dev/sda: 10 GiB, 10737418240 bytes, 20971520 sectors
+  # Units: sectors of 1 * 512 = 512 bytes
+  # Sector size (logical/physical): 512 bytes / 512 bytes 
+  # I/O size (minimum/optimal): 512 bytes / 512 bytes
+  # Disklabel type: dos
+  # Disk identifier: 0x96aa80ad
+  #
+  # Device     Boot   Start      End  Sectors  Size Id Type
+  # /dev/sda1  *       2048   208895   206848  101M 83 Linux
+  # /dev/sda2        208896  4362239  4153344    2G 82 Linux swap / Solaris
+  # /dev/sda3       4362240 20969471 16607232  7,9G 8e Linux LVM
+
+  - name: Unmount /boot.
+    mount:
+      path: /boot
+      state: absent
+
+  # Remove swap partition
+  - name: Remove swap partition.
+    parted:
+      device: "{{ device_path }}"
+      number: "{{ swap_partition_number }}"
+      state: absent
+
+  # Recreate swap partition
+  - name: Recreate swap partition.
+    parted:
+      device: "{{ device_path }}"
+      number: "{{ swap_partition_number }}"
+      state: present
+      part_start: "{{ (boot_partition_start|int)+(new_boot_partition_size_bytes|int)|int }}"
+
+  - name: Make swap partition a swap area.
+    shell: mkswap "{{ swap_partition_path }}"
+
+  - name: Activate swap partition.
+    shell: swapon "{{ swap_partition_path }}"
+
+  - name: Convert swapfile_size to bytes
+    shell: e2fsck -f "{{ boot_partition_path }}"
+
+  - name: Convert swapfile_size to bytes
+    shell: resize2fs "{{ boot_partition_path }}"
+
+  # TODO
+  # fstab check UUID of swap and boot
+
+  when: boot_partition_size and int(boot_partition_size) < int(boot_partition_minimum_size)

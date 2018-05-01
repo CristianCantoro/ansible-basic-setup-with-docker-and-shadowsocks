@@ -1,0 +1,6 @@
+---
+# vars file for resize-boot-partition
+# Minimum /boot partition should be at least 250MiB
+# See:
+#   https://help.ubuntu.com/community/DiskSpace
+boot_partition_minimum_size: 262144000
