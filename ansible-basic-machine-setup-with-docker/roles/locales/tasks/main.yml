@@ -1,13 +1,14 @@
 ---
 # fix issues with locales
-- name: Ensure /etc/locale.gen exists.
-  file: path=/etc/locale.gen state=file
 
-- name: Ensure locales are listed in /etc/locale.gen.
-  lineinfile:
-    dest: /etc/locale.gen
-    regexp: '^(\# )?{{item}}$'
-    line: '{{item}}'
+# This probably is not necessary anymore
+# - name: Ensure /etc/locale.gen exists.
+#   file: path=/etc/locale.gen state=file
+
+# Use locale_gen module
+- name: Ensure locales exists.
+  locale_gen:
+    name: "{{ item }}"
     state: present
   with_items: "{{ langs }}"
   notify:
