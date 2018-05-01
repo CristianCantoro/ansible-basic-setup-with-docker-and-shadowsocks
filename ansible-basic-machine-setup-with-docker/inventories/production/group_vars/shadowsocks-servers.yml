@@ -12,7 +12,7 @@ langs:
   - it_IT.UTF-8
 
 # role 'resize-boot-partition'
-new_boot_partition_size: '1GB'
+resized_boot_partition_size: '1GB'
 
 # role 'set-hostname'
 hostname: shadowserver2

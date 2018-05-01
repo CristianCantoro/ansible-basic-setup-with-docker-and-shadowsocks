@@ -94,13 +94,13 @@
 
   - name: Convert swapfile_size to bytes.
     shell: >
-      echo "{{ new_boot_partition_size }}" | \
+      echo "{{ resized_boot_partition_size }}" | \
       awk '/[0-9]B?$/{printf "%u\n", $1;next};
            /[tT]B?$/{printf "%u\n", $1*(1024*1024*1024*1024);next};
            /[gG]B?$/{printf "%u\n", $1*(1024*1024*1024);next};
            /[mM]B?$/{printf "%u\n", $1*(1024*1024);next};
            /[kK]B?$/{printf "%u\n", $1*1024;next};'
-    register: new_boot_partition_size_bytes
+    register: resized_boot_partition_size_bytes
 
   # $ fdisk -l /dev/sda
   # Disk /dev/sda: 10 GiB, 10737418240 bytes, 20971520 sectors
@@ -133,7 +133,7 @@
       device: "{{ device_path }}"
       number: "{{ swap_partition_number }}"
       state: present
-      part_start: "{{ (boot_partition_start|int)+(new_boot_partition_size_bytes|int)|int }}"
+      part_start: "{{ (boot_partition_start|int)+(resized_boot_partition_size_bytes|int)|int }}"
 
   - name: Make swap partition a swap area.
     shell: mkswap "{{ swap_partition_path }}"
