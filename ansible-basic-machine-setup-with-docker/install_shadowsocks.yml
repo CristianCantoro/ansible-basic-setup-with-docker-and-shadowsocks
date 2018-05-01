@@ -17,11 +17,7 @@
         groups: "{{ root_groups }}"
         update_user_password: "{{ update_root_password }}"
 
-    # activate locales:
-    # langs:
-    #   - it_IT.UTF-8 UTF-8
-    #   - en_US.UTF-8 UTF-8
-    #   - es_ES.UTF-8 UTF-8
+    # Enable locales: it_IT.UTF-8, en_US.UTF-8, es_ES.UTF-8
     - name: Enable locales.
       include_role:
         name: locales
@@ -45,17 +41,17 @@
       include_role:
         name: upgrade-release
 
-    # install basic packages
+    # Install basic packages
     - name: Install basic packages.
       include_role:
         name: install-basics
 
-    # install docker
-    - name: Install docker user.
+    # Install Docker
+    - name: Install Docker.
       include_role:
         name: ansible-docker
 
-    # add shadowsocks user
+    # Add shadowsocks user
     - name: Add shadowsocks user.
       include_role:
         name: add-user
@@ -64,7 +60,7 @@
         groups: "{{ shadowsocks_group }}"
         update_user_password: "{{ update_shadowsocks_password }}"
 
-    # secure SSH
+    # Secure SSH
     - name: Secure SSH.
       include_role:
         name: secure-ssh
@@ -78,7 +74,7 @@
         logging: "{{ ufw_logging }}"
         custom_ports: "{{ ufw_custom_ports }}"
 
-    # FIXME: pull shadowsocks container
+    # Pull shadowsocks container
     - name: Deploy docker container for shadowsocks.
       include_role:
         name: deploy-docker-shadowsocks-libev
