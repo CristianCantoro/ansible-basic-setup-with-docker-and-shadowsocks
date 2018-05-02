@@ -1,12 +1,32 @@
 ---
 # tasks file for set-hostname
+- name: Get current hostname.
+  command: hostname
+  register: old_hostname
+
+- set_fact:
+    old_hostname: "{{ old_hostname.stdout }}"
+
 - name: Set system's hostname.
   hostname:
     name: "{{ new_hostname }}"
 
-# modify /etc/hosts
+# modify /etc/hostname
 - name: Ensure /etc/hostname file has the same hostname.
   template:
     src: ./templates/etc/hostname.j2
     dest: /etc/hostname
     mode: 0644
+
+# modify /etc/hosts
+# See:
+#   * ansible replace regex with variable
+#     https://serverfault.com/q/825372/155367
+- name: Ensure /etc/hosts file has the same hostname.
+  replace:
+    path: /etc/hosts
+    regexp: >-
+      (\s+)"{{ old_hostname }}"(\s+.*)?$
+    replace: >-
+      \1"{{ new_hostname }}"\2
+    backup: yes
