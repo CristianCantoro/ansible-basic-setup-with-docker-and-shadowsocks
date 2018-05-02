@@ -45,6 +45,14 @@
   - set_fact:
       boot_partition_path: "{{ boot_partition_path.stdout }}"
 
+  # determine filesystem tipe of /boot partition
+  - name: Determine filesystem tipe of /boot partition.
+    command: findmnt -n -o FSTYPE -T /boot
+    register: boot_partition_fstype
+
+  - set_fact:
+      boot_partition_fstype: "{{ boot_partition_fstype.stdout }}"
+
   - name: Get device name from boot partition path.
     shell: lsblk -no pkname "{{ boot_partition_path }}"
     register: boot_device_name
@@ -68,11 +76,7 @@
       boot_partition_number: "{{ boot_partition_number.stdout }}"
 
   - name: Get swap partition path.
-    shell: >
-      fdisk -l "{{ device_path }}" | \
-        grep -E "^{{ device_path }}" | \
-        grep 'swap' | \
-        awk '{print $1}'
+    shell: swapon | grep 'partition' | awk '{print $1}'
     register: swap_partition_path
 
   - set_fact:
@@ -149,10 +153,12 @@
   # /dev/sda2        208896  4362239  4153344    2G 82 Linux swap / Solaris
   # /dev/sda3       4362240 20969471 16607232  7,9G 8e Linux LVM
 
+
+  # http://docs.ansible.com/ansible/latest/modules/mount_module.html
   - name: Unmount /boot.
     mount:
       path: /boot
-      state: absent
+      state: unmounted
 
   - name: Deactivate swap.
     command: swapoff "{{ swap_partition_path }}"
@@ -178,44 +184,67 @@
 
   - name: Make swap partition a swap area.
     shell: mkswap "{{ swap_partition_path }}"
-    register: swap_info
 
   - name: Activate swap partition.
     shell: swapon "{{ swap_partition_path }}"
 
-  - name: Convert swapfile_size to bytes
-    shell: e2fsck -f "{{ boot_partition_path }}"
+  # parted does not resize: https://github.com/ansible/ansible/issues/23914
+  - name: Resize /boot partition.
+    # Request resize, ack resize of partition that is in use (when requested).
+    # https://bugs.launchpad.net/ubuntu/+source/parted/+bug/1270203
+    # https://unix.stackexchange.com/a/365657
+    shell: >
+      parted "{{ device_path }}" \
+             resizepart \
+             "{{ boot_partition_number }}" \
+             "{{ (swap_partition_start|int)-1|int }}B"
 
-  - name: Convert swapfile_size to bytes
-    shell: resize2fs "{{ boot_partition_path }}"
+  - name: Run e2fsck on /boot.
+    shell: e2fsck -p -f "{{ boot_partition_path }}"
 
-  - debug:
-      var: swap_info
-
-  - fail:
-      msg: BOOM
+  - name: Grow /boot until maximum block size.
+    filesystem:
+      dev: "{{ boot_partition_path }}"
+      fstype: "{{ boot_partition_fstype }}"
+      resizefs: yes
 
   # fstab check UUID of swap and boot
+  - name: Get boot partitition UUID
+    command: blkid -s UUID -o value "{{ boot_partition_path }}"
+    register: boot_partition_uuid
+
+  - set_fact:
+      boot_partition_uuid: "{{ boot_partition_uuid.stdout }}"
+
+  - name: Get swap partitition UUID
+    command: blkid -s UUID -o value "{{ swap_partition_path }}"
+    register: swap_partition_uuid
+
+  - set_fact:
+      swap_partition_uuid: "{{ swap_partition_uuid.stdout }}"
+
   # See:
   #   * ansible replace regex with variable
   #     https://serverfault.com/q/825372/155367
-  # - name: Ensure new boot partition is listed in /etc/fstab.
-  #   replace:
-  #     path: /etc/fstab
-  #     regexp: >-
-  #       (\s+)"{{ old_hostname }}"(\s+.*)?$
-  #     replace: >-
-  #       \1"{{ new_hostname }}"\2
-  #     backup: yes
+  - name: Ensure new boot partition is listed in /etc/fstab.
+    replace:
+      path: /etc/fstab
+      regexp: >-
+        ^UUID="{{ boot_partition_uuid_old }}"(.*)$
+      replace: >-
+        UUID="{{ boot_partition_uuid }}"\1
+      backup: yes
+    notify: mount all
 
   - name: Ensure new swap UUID is listed in /etc/fstab.
     replace:
       path: /etc/fstab
       regexp: >-
-        ^UUID="{{ swap_partition_uuid_old }}"(\s+)none(\s+)swap(\s+)sw(\s+)0(\s+)0$
+        ^UUID="{{ swap_partition_uuid_old }}"(.*)$
       replace: >-
-        UUID="{{}}"\{1}none\{2}swap\{3}sw\{4}0\{5}0
+        UUID="{{ swap_partition_uuid }}"\1
       backup: yes
+    notify: mount all
 
   when: "(boot_partition_size|int) < (boot_partition_minimum_size|int)"
   rescue:
@@ -224,20 +253,33 @@
 
     - name: Check if /boot is mounted
       command: mountpoint -q /boot
-      register: boot_is_mounted
-
-    - debug:
-        var: boot_is_mounted
+      register: boot_not_mounted
+      ignore_errors: true
 
     - set_fact:
-        boot_is_mounted: "{{ boot_is_mounted }}"
+        boot_is_mounted: "{{ boot_not_mounted.rc }}"
 
     - name: Re-mounting /boot
       command: mount "{{ boot_partition_path }}" /boot
-      when: not boot_is_mounted
+      when: boot_not_mounted
 
-    # FIXME: Re-create swap, if needed
-    # FIXME: Re-activate swap, if needed
+    - name: Check if swap is activated
+      command: swapon | grep "{{ swap_partition_path }}"
+      when: swap_not_active
+      ignore_errors: true
+
+    - set_fact:
+        swap_not_active: "{{ swap_not_active.rc }}"
+
+    - block:
+      - name: Make swap partition a swap area.
+        shell: mkswap "{{ swap_partition_path }}"
+        ignore_errors: true
+
+      - name: Activate swap partition.
+        shell: swapon "{{ swap_partition_path }}"
+
+      when: swap_not_active
 
     - fail:
         msg: "Error caught, exiting"
