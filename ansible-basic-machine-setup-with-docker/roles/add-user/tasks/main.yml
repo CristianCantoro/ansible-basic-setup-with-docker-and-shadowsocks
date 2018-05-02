@@ -13,6 +13,8 @@
     set_fact:
       user_password: "{{ lookup('password', '/dev/null', length=32 )}}"
 
+  # we keep this because if we run without any verbosity option this will
+  # print out the password.
   - debug:
       var: user_password
       verbosity: 0
