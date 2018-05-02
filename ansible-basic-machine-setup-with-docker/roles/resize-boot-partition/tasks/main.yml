@@ -16,7 +16,7 @@
 # resize2fs /dev/sda1
 ##############################################################################
  
-# Check /boot size partion, if /boot is part of another partition 
+# Check /boot size partition, if /boot is part of another partition
 # - e.g. the root partition - boot_partition_size is empty.
 #
 # $ df -h /boot
@@ -30,11 +30,15 @@
 - set_fact:
     boot_partition_size: "{{ boot_partition_size.stdout }}"
 
-# Resize boot partition only if /boot is on a separate partition and the
-# partition size is smaller than the minimum.
-- block:
+# early failure, if boot_partition size is not set
+- fail:
+    msg: "boot_partition_size must be different from zero: {{ boot_partition_size }}"
+  when: not boot_partition_size
 
-  - name: Check boot size partiton.
+# Gather facts about boot ans swap only if /boot is on a separate partition
+# and the partition size is smaller than the minimum.
+- block:
+  - name: Get boot partition path.
     shell: df -h '/boot' | grep -E '/boot$' | awk '{print $1}'
     register: boot_partition_path
 
@@ -42,23 +46,19 @@
       boot_partition_path: "{{ boot_partition_path.stdout }}"
 
   - name: Get device name from boot partition path.
-    shell: lsblk -no pkname "'{{ boot_partition_path }}'"
+    shell: lsblk -no pkname "{{ boot_partition_path }}"
     register: boot_device_name
 
   - set_fact:
       device_path: "/dev/{{ boot_device_name.stdout }}"
 
   # Read device information (always use unit when probing)
-  - parted: device="{{ device_path }}"
+  - name: Check that the "{{ device_path }}" exists.
+    parted: device="{{ device_path }}" unit='B'
     register: device_info
 
   - debug:
       var: device_info
-
-  - name: Check that the "{{ device_path }}" exists.
-    stat:
-      path: "{{ device_path }}"
-      stete: present
 
   - name: Get boot partition number from boot partition path and boot device.
     shell: echo {{ boot_partition_path }} | sed -e "s#{{ device_path }}##"
@@ -67,13 +67,12 @@
   - set_fact:
       boot_partition_number: "{{ boot_partition_number.stdout }}"
 
-  - name: Get swap partition number.
+  - name: Get swap partition path.
     shell: >
-      fdisk -l "'{{ device_path }}'" | \
-        grep -E "'^{{ device_path }}'" | \
+      fdisk -l "{{ device_path }}" | \
+        grep -E "^{{ device_path }}" | \
         grep 'swap' | \
-        awk '{print $1}'  | \
-        sed -e "s#{{ device_path }}##"
+        awk '{print $1}'
     register: swap_partition_path
 
   - set_fact:
@@ -89,7 +88,7 @@
   - name: Assert that swap partition follows boot partition.
     assert:
       that:
-        - int(swap_partition_number) + 1 == int(boot_partition_number)
+        - (swap_partition_number|int) == (boot_partition_number|int) + 1
       msg: "swap partition ({{ swap_partition_path }}) needs to follow boot parition ({{ boot_partition_path }})."
 
   - name: Convert swapfile_size to bytes.
@@ -101,6 +100,41 @@
            /[mM]B?$/{printf "%u\n", $1*(1024*1024);next};
            /[kK]B?$/{printf "%u\n", $1*1024;next};'
     register: resized_boot_partition_size_bytes
+
+  - set_fact:
+      resized_boot_partition_size_bytes: "{{ resized_boot_partition_size_bytes.stdout|int }}"
+
+  - name: Get boot partition start.
+    set_fact:
+      boot_partition_start: "{{ device_info.partitions[(boot_partition_number|int)-1].begin|int }}"
+
+  - name: Get swap partition start.
+    set_fact:
+      swap_partition_start: "{{ (boot_partition_start|int)+(resized_boot_partition_size_bytes|int)|int }}"
+
+  - name: Get swap partition end.
+    set_fact:
+      swap_partition_end: "{{ device_info.partitions[(swap_partition_number|int)-1].end|int }}"
+
+  - name: Get boot partitition UUID
+    command: blkid -s UUID -o value "{{ boot_partition_path }}"
+    register: boot_partition_uuid_old
+
+  - set_fact:
+      boot_partition_uuid_old: "{{ boot_partition_uuid_old.stdout }}"
+
+  - name: Get swap partitition UUID
+    command: blkid -s UUID -o value "{{ swap_partition_path }}"
+    register: swap_partition_uuid_old
+
+  - set_fact:
+      swap_partition_uuid_old: "{{ swap_partition_uuid_old.stdout }}"
+
+  when: "(boot_partition_size|int) < (boot_partition_minimum_size|int)"
+
+# Resize boot partition only if /boot is on a separate partition and the
+# partition size is smaller than the minimum.
+- block:
 
   # $ fdisk -l /dev/sda
   # Disk /dev/sda: 10 GiB, 10737418240 bytes, 20971520 sectors
@@ -120,11 +154,15 @@
       path: /boot
       state: absent
 
+  - name: Deactivate swap.
+    command: swapoff "{{ swap_partition_path }}"
+
   # Remove swap partition
   - name: Remove swap partition.
     parted:
       device: "{{ device_path }}"
       number: "{{ swap_partition_number }}"
+      unit: 'B'
       state: absent
 
   # Recreate swap partition
@@ -132,11 +170,15 @@
     parted:
       device: "{{ device_path }}"
       number: "{{ swap_partition_number }}"
+      part_type: primary
+      unit: 'B'
       state: present
-      part_start: "{{ (boot_partition_start|int)+(resized_boot_partition_size_bytes|int)|int }}"
+      part_start: "{{ swap_partition_start }}B"
+      part_end: "{{ swap_partition_end }}B"
 
   - name: Make swap partition a swap area.
     shell: mkswap "{{ swap_partition_path }}"
+    register: swap_info
 
   - name: Activate swap partition.
     shell: swapon "{{ swap_partition_path }}"
@@ -147,7 +189,55 @@
   - name: Convert swapfile_size to bytes
     shell: resize2fs "{{ boot_partition_path }}"
 
-  # TODO
-  # fstab check UUID of swap and boot
+  - debug:
+      var: swap_info
 
-  when: boot_partition_size and int(boot_partition_size) < int(boot_partition_minimum_size)
+  - fail:
+      msg: BOOM
+
+  # fstab check UUID of swap and boot
+  # See:
+  #   * ansible replace regex with variable
+  #     https://serverfault.com/q/825372/155367
+  # - name: Ensure new boot partition is listed in /etc/fstab.
+  #   replace:
+  #     path: /etc/fstab
+  #     regexp: >-
+  #       (\s+)"{{ old_hostname }}"(\s+.*)?$
+  #     replace: >-
+  #       \1"{{ new_hostname }}"\2
+  #     backup: yes
+
+  - name: Ensure new swap UUID is listed in /etc/fstab.
+    replace:
+      path: /etc/fstab
+      regexp: >-
+        ^UUID="{{ swap_partition_uuid_old }}"(\s+)none(\s+)swap(\s+)sw(\s+)0(\s+)0$
+      replace: >-
+        UUID="{{}}"\{1}none\{2}swap\{3}sw\{4}0\{5}0
+      backup: yes
+
+  when: "(boot_partition_size|int) < (boot_partition_minimum_size|int)"
+  rescue:
+    - debug:
+       msg: 'Error caught, re-mounting /boot'
+
+    - name: Check if /boot is mounted
+      command: mountpoint -q /boot
+      register: boot_is_mounted
+
+    - debug:
+        var: boot_is_mounted
+
+    - set_fact:
+        boot_is_mounted: "{{ boot_is_mounted }}"
+
+    - name: Re-mounting /boot
+      command: mount "{{ boot_partition_path }}" /boot
+      when: not boot_is_mounted
+
+    # FIXME: Re-create swap, if needed
+    # FIXME: Re-activate swap, if needed
+
+    - fail:
+        msg: "Error caught, exiting"
