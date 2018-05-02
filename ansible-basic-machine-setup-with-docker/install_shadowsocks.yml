@@ -23,20 +23,24 @@
         name: locales
     - meta: flush_handlers
 
-    - name: Set new hostname
+    # Set new hostname
+    - name: Set new hostname.
       include_role:
         name: set-hostname
       vars:
         new_hostname: "{{ hostname }}"
 
+    # Resize boot partition
+    - name: Resize boot partition.
+      include_role:
+        name: resize-boot-partition
 
-    - name: Add swap to the system.
+    # Add swap
+    - name: Add swap.
       include_role:
         name: swap
 
-    # TODO: resize boot partition
-    # TODO: move boot partition to /
-
+    # Upgrade system
     - name: Upgrade system.
       include_role:
         name: upgrade-release
