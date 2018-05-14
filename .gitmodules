@@ -1,9 +1,9 @@
 [submodule "ansible/playbooks/roles/ansible-ssh-hardening"]
-	path = ansible-basic-machine-setup-with-docker/roles/ansible-ssh-hardening
+	path = roles/ansible-ssh-hardening
 	url = https://github.com/dev-sec/ansible-ssh-hardening.git
 [submodule "ansible/roles/ansible-docker"]
-	path = ansible-basic-machine-setup-with-docker/roles/ansible-docker
+	path = roles/ansible-docker
 	url = https://github.com/nickjj/ansible-docker.git
 [submodule "ansible-basic-machine-setup-with-docker/roles/ssh-filter/files/ssh-geoip-filter"]
-	path = ansible-basic-machine-setup-with-docker/roles/ssh-filter/files/ssh-geoip-filter
+	path = roles/ssh-filter/files/ssh-geoip-filter
 	url = git@github.com:CristianCantoro/ssh-geoip-filter.git
