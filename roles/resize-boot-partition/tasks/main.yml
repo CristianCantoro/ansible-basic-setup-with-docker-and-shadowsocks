@@ -234,7 +234,7 @@
       replace: >-
         UUID="{{ boot_partition_uuid }}"\1
       backup: yes
-    notify: mount all
+    notify: mountall
 
   - name: Ensure new swap UUID is listed in /etc/fstab.
     replace:
@@ -244,7 +244,7 @@
       replace: >-
         UUID="{{ swap_partition_uuid }}"\1
       backup: yes
-    notify: mount all
+    notify: mountall
 
   when: "(boot_partition_size|int) < (boot_partition_minimum_size|int)"
   rescue:
