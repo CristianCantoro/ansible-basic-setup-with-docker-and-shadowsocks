@@ -78,11 +78,9 @@ it is easily reusable.
     * apply `ssh-filter`.
 
 * `set-hostname`:
-  ensure that the hostname of the machine is set
-    * get current hostname.
-    * set system's hostname.
-    * ensure /etc/hostname file has the same hostname.
-    * ensure /etc/hosts file has the same hostname.
+  ensure that the hostname of the machine is set: get current hostname, set
+  system's hostname, and then ensure that `/etc/hostname` and `/etc/hosts`
+  files have the same hostname.
 
 * `set-ufw`:
   set [Uncomplicated FireWall (UFW)](http://gufw.org/) policy and enable UFW
