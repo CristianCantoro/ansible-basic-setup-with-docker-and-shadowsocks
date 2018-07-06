@@ -3,4 +3,6 @@
 # Minimum /boot partition should be at least 250MiB
 # See:
 #   https://help.ubuntu.com/community/DiskSpace
-boot_partition_minimum_size: 262144000
+#
+# boot partition minumum size is 512 MiB
+boot_partition_minimum_size: 536870910

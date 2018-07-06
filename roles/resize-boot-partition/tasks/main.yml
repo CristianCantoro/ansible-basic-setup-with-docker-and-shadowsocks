@@ -23,12 +23,24 @@
 # Filesystem      Size  Used Avail Use% Mounted on
 # /dev/sda1        98M   68M   25M  74% /boot
 #
-- name: Check boot size partiton.
-  shell: df '/boot' | grep -E '/boot$' | awk '{print $2}'
-  register: boot_partition_size
+- name: Get boot partition path.
+  shell: df -h '/boot' | grep -E '/boot$' | awk '{print $1}'
+  register: boot_partition_path
 
 - set_fact:
-    boot_partition_size: "{{ boot_partition_size.stdout }}"
+    boot_partition_path: "{{ boot_partition_path.stdout }}"
+
+- name: Get boot partition size.
+  parted: device="{{ boot_partition_path }}" unit='B'
+  register: boot_partition
+
+- set_fact:
+    boot_partition_size: "{{ boot_partition|json_query('disk.size') }}"
+
+- debug:
+    var: boot_partition_size
+
+- meta: end_play
 
 # early failure, if boot_partition size is not set
 - fail:
@@ -38,12 +50,6 @@
 # Gather facts about boot ans swap only if /boot is on a separate partition
 # and the partition size is smaller than the minimum.
 - block:
-  - name: Get boot partition path.
-    shell: df -h '/boot' | grep -E '/boot$' | awk '{print $1}'
-    register: boot_partition_path
-
-  - set_fact:
-      boot_partition_path: "{{ boot_partition_path.stdout }}"
 
   # determine filesystem tipe of /boot partition
   - name: Determine filesystem tipe of /boot partition.
