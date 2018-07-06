@@ -40,8 +40,6 @@
 - debug:
     var: boot_partition_size
 
-- meta: end_play
-
 # early failure, if boot_partition size is not set
 - fail:
     msg: "boot_partition_size must be different from zero: {{ boot_partition_size }}"
