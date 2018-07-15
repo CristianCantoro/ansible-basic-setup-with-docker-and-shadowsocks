@@ -18,3 +18,7 @@ basic_packages:
   - ca-certificates
   - software-properties-common
   - python3-pip
+  - nmon
+  - sysstat
+  - isag
+  - vnstat
