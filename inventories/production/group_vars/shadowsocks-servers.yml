@@ -41,7 +41,6 @@ update_shadowsocks_password: true
 
 # role 'ssh-secure'
 ssh_server_ports: ['29808']
-ssh_client_port: '29808'
 
 # role 'deploy-docker-shadowsocks-libev'
 shadowsocks_server_port: 443
