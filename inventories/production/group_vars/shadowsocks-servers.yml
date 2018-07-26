@@ -40,7 +40,7 @@ shadowsocks_group: ['sudo', 'docker']
 update_shadowsocks_password: true
 
 # role 'ssh-secure'
-ssh_server_ports: ['29808']
+ssh_server_ports: ['22222']
 
 # role 'deploy-docker-shadowsocks-libev'
 shadowsocks_server_port: 443
