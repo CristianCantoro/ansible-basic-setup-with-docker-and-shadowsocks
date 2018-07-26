@@ -49,5 +49,5 @@ shadowsocks_server_port: 443
 ufw_policy: 'deny'
 ufw_logging: off
 ufw_custom_ports:
-  - {rule: limit, port: "{{ ssh_client_port }}", proto: tcp}
+  - {rule: limit, port: "{{ ssh_server_ports|join(',') }}", proto: tcp}
   - {rule: allow, port: "{{ shadowsocks_server_port }}", proto: any}
