@@ -5,9 +5,19 @@
 # https://www.digitalocean.com/community/tutorials/
 #     how-to-add-swap-space-on-ubuntu-16-04
 #
+
+# - name: Check if swapfile exists.
+#   stat: path="{{ swapfile_path }}"
+#   register: swapfile
 - name: Check if swapfile exists.
-  stat: path="{{ swapfile_path }}"
+  command: stat "{{ swapfile_path }}"
   register: swapfile
+  ignore_errors: true
+
+
+- set_fact:
+    swapfile_exists: "{{ True if swapfile.rc == 0 else False }}"
+
 
 # Use a block to perform tasks conditionally
 # only if /.swapfile is not present
@@ -85,7 +95,7 @@
         # make swapfile permanent
         {{ swapfile_path }}   none    swap    sw    0   0
 
-  when: swapfile.stat.exists == False
+  when: swapfile_exists == False
   rescue:
     - debug:
        msg: 'Error caught, deactivating and deleting swapfile (if it exists)'
