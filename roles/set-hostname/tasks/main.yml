@@ -26,7 +26,7 @@
   replace:
     path: /etc/hosts
     regexp: >-
-      (\s+)"{{ old_hostname }}"(\s+.*)?$
+      "{{ old_hostname }}"
     replace: >-
-      \1"{{ new_hostname }}"\2
+      "{{ new_hostname }}"
     backup: yes
