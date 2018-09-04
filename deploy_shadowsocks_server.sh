@@ -11,7 +11,7 @@ fi
 usage() {
   echo \
 "Usage:
-  deploy_boinc_server.sh [options] [<ssh_port>]
+  deploy_shadowsocks_server.sh [options] [<ssh_port>]
 
 Deploy a BOINC server.
 
@@ -21,7 +21,7 @@ Options:
   -S <shadowsocks_server_port>  Value of the option shadowsocks_server_port.
 
 Example:
-  deploy_boinc_server.sh"
+  deploy_shadowsocks_server.sh"
 }
 
 flag_help=false
