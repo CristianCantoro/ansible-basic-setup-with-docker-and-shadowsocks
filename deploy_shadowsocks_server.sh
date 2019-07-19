@@ -18,7 +18,7 @@ Deploy a BOINC server.
 Options:
   -h                            Show this help and exits.
   -s <ssh_port>                 SSH server port [default: 22].
-  -S <ssserver_port>            Shadowsocks server port [default: 8388].
+  -S <ssserver_port>            Shadowsocks server port [default: 443].
 
 Example:
   deploy_shadowsocks_server.sh"
@@ -26,7 +26,7 @@ Example:
 
 flag_help=false
 ssh_port=22
-ssserver_port=8388
+ssserver_port=443
 while getopts ":hs:S:" opt; do
   case $opt in
     h)
