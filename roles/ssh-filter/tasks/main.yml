@@ -6,9 +6,8 @@
 
 - name: Install geoip packages.
   apt:
-    name={{item}}
+    name="{{ geoip_packages }}"
     state=present
-  with_items: "{{ geoip_packages }}"
 
 # 4. Copy executables to /usr/local/bin/
 - name: Copy sshfilter executable to /usr/local/bin/sshfilter.
