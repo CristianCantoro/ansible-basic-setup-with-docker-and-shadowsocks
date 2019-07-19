@@ -24,7 +24,7 @@
 # /dev/sda1        98M   68M   25M  74% /boot
 #
 - name: Get boot partition path.
-  shell: df -h '/boot' | grep -E '/boot$' | awk '{print $1}'
+  shell: df -P /boot | tail -1 | cut -d' ' -f 1
   register: boot_partition_path
 
 - set_fact:
