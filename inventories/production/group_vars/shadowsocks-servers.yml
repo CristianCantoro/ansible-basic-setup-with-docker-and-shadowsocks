@@ -7,7 +7,6 @@ root_groups: ['sudo']
 
 # role: 'locales'
 langs:
-  - es_ES.UTF-8
   - en_US.UTF-8
   - it_IT.UTF-8
 
@@ -15,7 +14,7 @@ langs:
 resized_boot_partition_size: '1GB'
 
 # role 'set-hostname'
-hostname: shadowserver2
+hostname: shadowserver
 
 # role: 'swap'
 swapfile_size: 2G
@@ -32,7 +31,7 @@ docker_edition: "ce"
 docker_channel: "stable"
 
 ## What version of Docker do you want to install?
-docker_version: "18.03.1"
+docker_version: "18.09"
 
 # role: 'add-user' (shadowsocks)
 shadowsocks_user: 'shadowsocks'
