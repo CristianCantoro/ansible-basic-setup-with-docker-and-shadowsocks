@@ -9,6 +9,5 @@
 #
 - name: Install packages
   apt:
-    name: "{{item}}"
+    name: "{{ basic_packages }}"
     state: present
-  with_items: "{{ basic_packages }}"
