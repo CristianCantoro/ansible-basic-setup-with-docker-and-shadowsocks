@@ -9,7 +9,6 @@ basic_packages:
   - zsh
   - git-core
   - molly-guard
-  - realpath
   - ntp
   - ntp-doc
   - ntpdate
