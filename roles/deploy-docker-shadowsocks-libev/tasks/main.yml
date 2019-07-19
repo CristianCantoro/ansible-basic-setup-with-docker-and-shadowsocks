@@ -39,7 +39,7 @@
     project_name: shadowsocks
     definition:
       server:
-        image: easypi/shadowsocks-libev
+        image: shadowsocks/shadowsocks-libev
         ports:
           - "{{ shadowsocks_server_port }}:{{ shadowsocks_server_port }}/tcp"
           - "{{ shadowsocks_server_port }}:{{ shadowsocks_server_port }}/udp"
