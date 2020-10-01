@@ -34,8 +34,8 @@
     mode: 0644
 
 # 5. Update the geoip database
-- name: Update the geoip database.
-  command: /usr/local/bin/update-geoip
+# - name: Update the geoip database.
+#  command: /usr/local/bin/update-geoip
 
 # 6. Test if 'sshfilter' is working
 
