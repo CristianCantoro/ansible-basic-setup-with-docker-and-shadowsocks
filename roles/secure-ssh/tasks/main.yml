@@ -15,15 +15,6 @@
   import_role:
     name: ansible-ssh-hardening
 
-# X11Forwarding yes -> X11Forwarding no
-- name: Disable X11 forwarding.
-  lineinfile:
-    dest: /etc/ssh/sshd_config
-    regexp: '^(\# )?X11Forwarding\s+yes$'
-    line: 'X11Forwarding no'
-    state: present
-  notify: restart ssh service
-
 # Filter ssh connections base of IP address location
 - name: Filter ssh connections base of IP address location.
   import_role:

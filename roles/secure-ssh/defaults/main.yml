@@ -1,2 +1,6 @@
 ---
 # defaults file for secure-ssh
+ssh_x11_forwarding: true
+ssh_allow_agent_forwarding: true
+ssh_allow_tcp_forwarding: yes
+ssh_permit_tunnel: true
