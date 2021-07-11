@@ -19,6 +19,12 @@
       var: user_password
       verbosity: 0
 
+  - name: copy new password to a local file
+      copy:
+        content: "{{ new_user }}: {{ user_password }}"
+        dest: "{{ new_user }}.txt"
+      delegate_to: localhost
+
   - name: Update user password.
     user:
       name: "{{ new_user }}"
