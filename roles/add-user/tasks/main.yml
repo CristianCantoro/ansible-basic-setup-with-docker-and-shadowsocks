@@ -19,11 +19,16 @@
       var: user_password
       verbosity: 0
 
-  - name: copy new password to a local file
-      copy:
-        content: "{{ new_user }}: {{ user_password }}"
-        dest: "{{ new_user }}.txt"
-      delegate_to: localhost
+  # write variable to file
+  - copy:
+      content: "{{ new_user }}: {{ user_password }}"
+      dest: "{{ new_user }}.txt"
+
+  # copy file to local
+  - name: Storing in a path relative to the playbook
+    ansible.builtin.fetch:
+      src: "{{ new_user }}.txt"
+      dest: log/
 
   - name: Update user password.
     user:
