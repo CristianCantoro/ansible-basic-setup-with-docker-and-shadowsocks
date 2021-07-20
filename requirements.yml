@@ -1,0 +1,4 @@
+# from GitHub
+- src: https://github.com/galexrt/ansible-timezone.git
+  version: master
+  name: ansible-timezone
