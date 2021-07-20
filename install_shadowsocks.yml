@@ -2,6 +2,8 @@
 - name: Install shadowsocks
   hosts: shadowsocks-servers
   remote_user: root
+  collections:
+    - ansible-timezone
 
   vars:
       ansible_ssh_transfer_method: scp
@@ -30,11 +32,18 @@
       vars:
         new_hostname: "{{ hostname }}"
 
-    # Resize boot partition
-    - name: Resize boot partition.
-      include_role:
-        name: resize-boot-partition
-    - meta: flush_handlers
+    # Set timezone to UTC
+    - name: Deploy docker containers for boinc and boinctui.
+      import_role:
+        name: ansible-timezone
+      vars:
+        timezone: "UTC"
+
+    # # Resize boot partition
+    # - name: Resize boot partition.
+    #   include_role:
+    #     name: resize-boot-partition
+    # - meta: flush_handlers
 
     # Add swap
     - name: Add swap.
