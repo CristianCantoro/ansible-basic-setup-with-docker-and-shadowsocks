@@ -18,9 +18,9 @@
     group: root
     mode: 0775
 
-- name: Copy update-geoip executable to /usr/local/bin/update-geoip.
+- name: Copy geoipupdate-log executable to /usr/local/bin/geoipupdate-log.
   copy:
-    src: ./files/ssh-geoip-filter/files/usr/local/bin/update-geoip
+    src: ./files/ssh-geoip-filter/files/usr/local/bin/geoipupdate-log
     dest: /usr/local/bin/update-geoip
     owner: root
     group: root
