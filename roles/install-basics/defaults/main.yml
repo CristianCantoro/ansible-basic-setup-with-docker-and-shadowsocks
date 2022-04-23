@@ -1,23 +1,21 @@
 ---
 # defaults file for install-basics
 basic_packages:
-  - htop
-  - tree
-  - lynx
-  - colordiff
-  - tmux
-  - zsh
-  - git-core
-  - molly-guard
-  - ntp
-  - ntp-doc
-  - ntpdate
-  - gpgv2
   - apt-transport-https
   - ca-certificates
-  - software-properties-common
-  - python3-pip
-  - nmon
-  - sysstat
+  - colordiff
+  - git-core
+  - gpgv2
+  - htop
   - isag
+  - lynx
+  - molly-guard
+  - nmon
+  - python3-pip
+  - software-properties-common
+  - sysstat
+  - systemd-timesyncd
+  - tmux
+  - tree
   - vnstat
+  - zsh
